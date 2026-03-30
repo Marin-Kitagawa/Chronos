@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-geospatial"
+version.workspace = true
+edition.workspace = true

@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-ir-codegen"
+version.workspace = true
+edition.workspace = true

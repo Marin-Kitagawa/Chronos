@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-hotreload"
+version.workspace = true
+edition.workspace = true

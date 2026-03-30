@@ -1,0 +1,8 @@
+[package]
+name    = "chronos-graph"
+version.workspace = true
+edition.workspace = true
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"

@@ -1,0 +1,64 @@
+[workspace]
+resolver = "2"
+members = [
+    # Unified compiler core (all pipeline files in one crate)
+    "crates/compiler/chronos-compiler-core",
+
+    # Compiler pipeline
+    "crates/compiler/chronos-lexer",
+    "crates/compiler/chronos-lexer-v2",
+    "crates/compiler/chronos-parser",
+    "crates/compiler/chronos-parser-v2",
+    "crates/compiler/chronos-type-inference",
+    "crates/compiler/chronos-inference-ir-v2",
+    "crates/compiler/chronos-ir-codegen",
+    "crates/compiler/chronos-stdlib-types",
+    "crates/compiler/chronos-security-realtime",
+    "crates/compiler/chronos-unified-integration",
+
+    # Domain engines
+    "crates/engines/chronos-graph",
+    "crates/engines/chronos-cas",
+    "crates/engines/chronos-network",
+    "crates/engines/chronos-os",
+    "crates/engines/chronos-distributed",
+    "crates/engines/chronos-blockchain",
+    "crates/engines/chronos-proof",
+    "crates/engines/chronos-quantum",
+    "crates/engines/chronos-simulation",
+    "crates/engines/chronos-financial",
+    "crates/engines/chronos-geospatial",
+    "crates/engines/chronos-dsp",
+    "crates/engines/chronos-i18n",
+    "crates/engines/chronos-accessibility",
+    "crates/engines/chronos-ffi",
+    "crates/engines/chronos-hotreload",
+    "crates/engines/chronos-observability",
+    "crates/engines/chronos-bioinformatics",
+    "crates/engines/chronos-nlp",
+    "crates/engines/chronos-database",
+    "crates/engines/chronos-game",
+    "crates/engines/chronos-multimedia",
+    "crates/engines/chronos-robotics",
+    "crates/engines/chronos-ui",
+    "crates/engines/chronos-macro-engine",
+    "crates/engines/chronos-missing-features",
+
+    # Tooling
+    "crates/tooling/chronos-build",
+    "crates/tooling/chronos-testing",
+    "crates/tooling/chronos-docs",
+
+    # Binary
+    "crates/bin/chronos-cli",
+]
+
+[workspace.package]
+version     = "0.1.0"
+edition     = "2021"
+authors     = ["Chronos Language Project"]
+license     = "MIT OR Apache-2.0"
+repository  = "https://github.com/chronos-lang/chronos"
+
+[workspace.dependencies]
+logos = "0.14"

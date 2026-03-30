@@ -1,0 +1,11 @@
+[package]
+name    = "chronos-lexer"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+logos = { workspace = true }
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"

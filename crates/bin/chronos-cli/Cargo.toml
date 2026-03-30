@@ -1,0 +1,11 @@
+[package]
+name    = "chronos-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "chronos"
+path = "src/main.rs"
+
+[dependencies]
+chronos-compiler-core = { path = "../../compiler/chronos-compiler-core" }

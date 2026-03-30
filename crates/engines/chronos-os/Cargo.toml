@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-os"
+version.workspace = true
+edition.workspace = true

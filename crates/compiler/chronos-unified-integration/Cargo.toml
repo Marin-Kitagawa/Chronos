@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-unified-integration"
+version.workspace = true
+edition.workspace = true

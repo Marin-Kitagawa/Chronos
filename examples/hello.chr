@@ -1,0 +1,12 @@
+// hello.chr — Minimal hello world in Chronos
+//
+// Demonstrates:
+//   - fn declaration with no parameters and void return type
+//   - let binding with an explicit string type
+//   - Expression statement (function call)
+//   - String literal
+
+fn main() {
+    let message: string = "Hello, Chronos!";
+    println(message);
+}

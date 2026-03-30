@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-type-inference"
+version.workspace = true
+edition.workspace = true

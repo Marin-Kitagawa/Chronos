@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-blockchain"
+version.workspace = true
+edition.workspace = true

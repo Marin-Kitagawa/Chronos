@@ -1,0 +1,51 @@
+// fibonacci.chr — Recursive and iterative Fibonacci in Chronos
+//
+// Demonstrates:
+//   - fn declarations with parameters (name: Type syntax)
+//   - -> return type syntax
+//   - if / else expressions (condition without parentheses)
+//   - return statement
+//   - Integer arithmetic operators: +, -, <=
+//   - let bindings with explicit type annotations
+//   - var bindings (mutable)
+//   - while loop
+//   - Expression statements (function calls)
+
+// Recursive Fibonacci.
+// Parameters use   name: Type   syntax.
+// Return type uses -> i64.
+fn fib_recursive(n: i64) -> i64 {
+    if n <= 1 {
+        return n;
+    }
+    return fib_recursive(n - 1) + fib_recursive(n - 2);
+}
+
+// Iterative Fibonacci — avoids stack growth for large n.
+fn fib_iterative(n: i64) -> i64 {
+    if n <= 1 {
+        return n;
+    }
+    var a: i64 = 0;
+    var b: i64 = 1;
+    var i: i64 = 2;
+    while i <= n {
+        let tmp: i64 = a + b;
+        a = b;
+        b = tmp;
+        i = i + 1;
+    }
+    return b;
+}
+
+fn main() {
+    // Print the first ten Fibonacci numbers using both implementations.
+    let limit: i64 = 10;
+    var idx: i64 = 0;
+    while idx <= limit {
+        let r: i64 = fib_recursive(idx);
+        let it: i64 = fib_iterative(idx);
+        println(idx, r, it);
+        idx = idx + 1;
+    }
+}

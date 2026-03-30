@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-simulation"
+version.workspace = true
+edition.workspace = true

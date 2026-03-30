@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-network"
+version.workspace = true
+edition.workspace = true

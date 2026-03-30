@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-multimedia"
+version.workspace = true
+edition.workspace = true

@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-parser"
+version.workspace = true
+edition.workspace = true

@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-accessibility"
+version.workspace = true
+edition.workspace = true

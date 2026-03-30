@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-ffi"
+version.workspace = true
+edition.workspace = true

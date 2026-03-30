@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-nlp"
+version.workspace = true
+edition.workspace = true

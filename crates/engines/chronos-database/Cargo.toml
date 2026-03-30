@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-database"
+version.workspace = true
+edition.workspace = true

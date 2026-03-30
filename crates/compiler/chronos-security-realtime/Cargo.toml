@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-security-realtime"
+version.workspace = true
+edition.workspace = true

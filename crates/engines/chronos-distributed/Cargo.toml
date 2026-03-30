@@ -1,0 +1,4 @@
+[package]
+name    = "chronos-distributed"
+version.workspace = true
+edition.workspace = true
