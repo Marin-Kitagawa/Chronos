@@ -1,2 +1,2 @@
 //! Chronos blockchain engine — SHA-256, Keccak-256, EVM interpreter, smart contracts.
-include!("../../../../chronos-blockchain-engine.rs");
+include!("../../../../src/engines/chronos-blockchain-engine.rs");

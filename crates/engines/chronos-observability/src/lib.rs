@@ -1,3 +1,3 @@
 #![allow(dead_code, unused_imports, unused_variables, unused_mut)]
 //! Chronos observability engine — distributed tracing, metrics, structured logging.
-include!("../../../../chronos-observability-engine.rs");
+include!("../../../../src/engines/chronos-observability-engine.rs");

@@ -1,2 +1,2 @@
 //! Chronos testing framework — property-based testing, fuzzing, TAP/JUnit output.
-include!("../../../../chronos-testing-framework.rs");
+include!("../../../../src/tooling/chronos-testing-framework.rs");

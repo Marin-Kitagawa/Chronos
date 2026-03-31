@@ -1,2 +1,2 @@
 //! Chronos NLP engine — tokenization, POS tagging, NER, dependency parsing.
-include!("../../../../chronos-nlp-engine.rs");
+include!("../../../../src/engines/chronos-nlp-engine.rs");

@@ -1,2 +1,2 @@
 //! Chronos financial engine — Black-Scholes, binomial tree, Monte Carlo, bonds.
-include!("../../../../chronos-financial-engine.rs");
+include!("../../../../src/engines/chronos-financial-engine.rs");

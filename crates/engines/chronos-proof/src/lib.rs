@@ -1,2 +1,2 @@
 //! Chronos proof engine — Curry-Howard, Calculus of Constructions, tactics.
-include!("../../../../chronos-proof-engine.rs");
+include!("../../../../src/engines/chronos-proof-engine.rs");
