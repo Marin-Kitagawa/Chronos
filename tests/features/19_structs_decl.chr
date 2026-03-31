@@ -1,0 +1,27 @@
+// Tests: struct declaration parsing.
+// The parser must accept struct declarations with various field types.
+// Note: struct literal syntax (Type { field: val }) is not yet supported;
+// this test only verifies that struct DECLARATIONS parse and compile.
+
+pub struct Point {
+    x: f64,
+    y: f64,
+}
+
+pub struct Dimensions {
+    width: i64,
+    height: i64,
+    depth: i64,
+}
+
+pub struct Sensor {
+    id: i64,
+    value: f64,
+    active: bool,
+    label: string,
+}
+
+fn main() {
+    // No struct instances needed — just verify declaration parsing.
+    println("struct declaration test");
+}

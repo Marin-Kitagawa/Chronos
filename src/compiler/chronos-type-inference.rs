@@ -699,10 +699,26 @@ impl TypeInferenceEngine {
 
                 let final_ty = if let Some(declared_ty) = ty {
                     let declared = InferType::Concrete(declared_ty.clone());
-                    self.constraints.push(Constraint::Subtype(
-                        value_ty.clone(), declared.clone(),
-                        self.origin(&format!("let binding `{}`", name)),
-                    ));
+                    // Skip the widening constraint when a numeric literal is assigned to
+                    // a numeric variable with an explicit type annotation. Integer literals
+                    // are always inferred as Int64 and float literals as Float64, but they
+                    // should be valid initializers for any narrower numeric type (e.g.,
+                    // `let x: i8 = 10` must succeed).
+                    let is_numeric_literal = matches!(value,
+                        Expression::IntLiteral(_) | Expression::FloatLiteral(_)
+                    );
+                    let is_numeric_declared = matches!(declared_ty,
+                        ChronosType::Int8  | ChronosType::Int16  | ChronosType::Int32  |
+                        ChronosType::Int64 | ChronosType::UInt8  | ChronosType::UInt16 |
+                        ChronosType::UInt32 | ChronosType::UInt64 |
+                        ChronosType::Float16 | ChronosType::Float32 | ChronosType::Float64
+                    );
+                    if !(is_numeric_literal && is_numeric_declared) {
+                        self.constraints.push(Constraint::Subtype(
+                            value_ty.clone(), declared.clone(),
+                            self.origin(&format!("let binding `{}`", name)),
+                        ));
+                    }
 
                     // Check if this is a linear or affine type.
                     match declared_ty {

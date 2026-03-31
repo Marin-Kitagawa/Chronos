@@ -1,0 +1,54 @@
+// Tests: trait declaration parsing.
+// Note: 'self' is a keyword and cannot be used as a parameter name.
+// Note: struct literals are not yet supported.
+// This test verifies that trait declarations parse without error.
+
+trait Printable {
+    fn display() -> string;
+}
+
+trait Measurable {
+    fn size() -> i64;
+    fn is_empty() -> bool;
+}
+
+trait Comparable {
+    fn less_than(a: i64, b: i64) -> bool;
+    fn greater_than(a: i64, b: i64) -> bool;
+    fn equal_to(a: i64, b: i64) -> bool;
+}
+
+struct Bag {
+    count: i64,
+    label: string,
+}
+
+struct Stack {
+    top: i64,
+    capacity: i64,
+}
+
+impl Measurable for Bag {
+    fn size() -> i64 {
+        return 0;
+    }
+    fn is_empty() -> bool {
+        return true;
+    }
+}
+
+impl Comparable for Stack {
+    fn less_than(a: i64, b: i64) -> bool {
+        return a < b;
+    }
+    fn greater_than(a: i64, b: i64) -> bool {
+        return a > b;
+    }
+    fn equal_to(a: i64, b: i64) -> bool {
+        return a == b;
+    }
+}
+
+fn main() {
+    println("trait parse test");
+}

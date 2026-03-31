@@ -1,0 +1,93 @@
+// Tests: if/else statements and branches
+
+fn sign(n: i64) -> i64 {
+    if n > 0 {
+        return 1;
+    } else {
+        if n < 0 {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+}
+
+fn max(a: i64, b: i64) -> i64 {
+    if a > b {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+fn min(a: i64, b: i64) -> i64 {
+    if a < b {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+fn classify(n: i64) -> string {
+    if n < 0 {
+        return "negative";
+    } else {
+        if n == 0 {
+            return "zero";
+        } else {
+            return "positive";
+        }
+    }
+}
+
+fn main() {
+    // Basic if-else
+    let x: i64 = 5;
+    if x > 0 {
+        println("positive");
+    } else {
+        println("non-positive");
+    }
+
+    // If without else
+    let y: i64 = 10;
+    if y == 10 {
+        println("ten");
+    }
+
+    // Nested if-else chain
+    let s1: i64 = sign(42);
+    let s2: i64 = sign(-7);
+    let s3: i64 = sign(0);
+    println(s1);
+    println(s2);
+    println(s3);
+
+    // Max and min
+    let m1: i64 = max(3, 7);
+    let m2: i64 = max(9, 2);
+    let mn: i64 = min(3, 7);
+    println(m1);
+    println(m2);
+    println(mn);
+
+    // Classify
+    println(classify(-5));
+    println(classify(0));
+    println(classify(100));
+
+    // If with bool condition
+    var b: bool = true;
+    if b {
+        println("true branch");
+    } else {
+        println("false branch");
+    }
+
+    b = false;
+    if b {
+        println("still true");
+    } else {
+        println("now false");
+    }
+}

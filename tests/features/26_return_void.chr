@@ -1,0 +1,53 @@
+// Tests: void return type — functions with no return value
+
+fn separator() {
+    println("---");
+}
+
+fn print_twice(x: i64) {
+    println(x);
+    println(x);
+}
+
+fn print_range(lo: i64, hi: i64) {
+    var i: i64 = lo;
+    while i <= hi {
+        println(i);
+        i = i + 1;
+    }
+}
+
+fn conditional_print(x: i64, threshold: i64) {
+    if x > threshold {
+        println("above");
+    }
+    return;
+}
+
+fn nested_void(n: i64) {
+    var i: i64 = 0;
+    while i < n {
+        separator();
+        i = i + 1;
+    }
+}
+
+fn main() {
+    separator();
+
+    print_twice(42);
+    print_twice(99);
+
+    separator();
+
+    print_range(1, 5);
+
+    separator();
+
+    conditional_print(10, 5);
+    conditional_print(3, 5);
+
+    separator();
+
+    nested_void(2);
+}

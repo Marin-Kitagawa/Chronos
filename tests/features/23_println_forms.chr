@@ -1,0 +1,41 @@
+// Tests: all println call forms — zero args, one arg, multi-arg, various types
+
+fn main() {
+    // Zero arguments (newline only)
+    println();
+
+    // Single argument — each primitive type
+    println(42);
+    println(3.14);
+    println(true);
+    println(false);
+    println("hello");
+
+    // Variables of each type
+    let i: i64 = 100;
+    let f: f64 = 2.718;
+    let b: bool = true;
+    let s: string = "world";
+    println(i);
+    println(f);
+    println(b);
+    println(s);
+
+    // Multi-argument println (printf-style)
+    println("value:", i);
+    println("pi:", f);
+    println("flag:", b);
+    println("name:", s);
+    println(i, f);
+    println("i:", i, "f:", f);
+
+    // Expressions directly in println
+    println(1 + 2);
+    println(10 * 5);
+    println(7 % 3);
+
+    // Boolean expression in println
+    let x: i64 = 5;
+    println(x > 3);
+    println(x == 5);
+}

@@ -1,0 +1,60 @@
+// Tests: complex expressions combining multiple operators and parentheses
+
+fn main() {
+    // Precedence: * before +
+    let r1: i64 = 2 + 3 * 4;
+    println(r1);
+
+    // Overriding precedence with parens
+    let r2: i64 = (2 + 3) * 4;
+    println(r2);
+
+    // Mixed arithmetic
+    let r3: i64 = 10 - 2 * 3 + 4 / 2;
+    println(r3);
+
+    // Deeply nested parens
+    let r4: i64 = ((2 + 3) * (4 - 1)) / 3;
+    println(r4);
+
+    // Boolean expression tree
+    let a: i64 = 5;
+    let b: i64 = 10;
+    let c: i64 = 15;
+    let result: bool = (a < b) && (b < c) || (c == 15);
+    println(result);
+
+    // Negation combined with arithmetic
+    let r5: i64 = -(3 + 4);
+    println(r5);
+
+    // NOT combined with comparison
+    let r6: bool = !(a == b);
+    println(r6);
+
+    // Chained comparison via &&
+    let in_range: bool = a >= 0 && a <= 10 && b >= 0 && b <= 20;
+    println(in_range);
+
+    // Complex float expression
+    let pi: f64 = 3.14159265;
+    let r: f64 = 2.0;
+    let circumference: f64 = 2.0 * pi * r;
+    let area: f64 = pi * r * r;
+    println(circumference);
+    println(area);
+
+    // Expression with modulo
+    let divisible_by_6: bool = (100 % 2 == 0) && (100 % 3 == 0);
+    println(divisible_by_6);
+
+    // Large expression in while condition
+    var x: i64 = 0;
+    var y: i64 = 100;
+    while x < 10 && y > 50 {
+        x += 1;
+        y -= 5;
+    }
+    println(x);
+    println(y);
+}

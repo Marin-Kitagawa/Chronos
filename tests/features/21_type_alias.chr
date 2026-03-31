@@ -1,0 +1,18 @@
+// Tests: type alias declaration parsing.
+// Note: type aliases are parsed and stored, but the type checker treats
+// Named types as opaque — they cannot be unified with their primitive target
+// without extension to the type inference engine.
+// This test verifies that type alias DECLARATIONS parse without error.
+
+type Meters = f64;
+type Seconds = f64;
+type Count = i64;
+type Name = string;
+type Flag = bool;
+type Index = i64;
+type Score = f64;
+
+// Functions using type aliases compile fine when aliases are used consistently.
+fn main() {
+    println("type alias declaration test");
+}

@@ -1,0 +1,52 @@
+// Tests: logical operators &&, ||, and unary !
+
+fn main() {
+    let t: bool = true;
+    let f: bool = false;
+
+    // AND operator
+    let and_tt: bool = t && t;
+    let and_tf: bool = t && f;
+    let and_ff: bool = f && f;
+    println(and_tt);
+    println(and_tf);
+    println(and_ff);
+
+    // OR operator
+    let or_tf: bool = t || f;
+    let or_ff: bool = f || f;
+    let or_tt: bool = t || t;
+    println(or_tf);
+    println(or_ff);
+    println(or_tt);
+
+    // NOT operator
+    let not_t: bool = !t;
+    let not_f: bool = !f;
+    println(not_t);
+    println(not_f);
+
+    // Combined logical expressions
+    let x: i64 = 5;
+    let y: i64 = 10;
+    let in_range: bool = x > 0 && x < y;
+    println(in_range);
+
+    let out_range: bool = x < 0 || x > 100;
+    println(out_range);
+
+    // Negating a comparison
+    let not_eq: bool = !(x == y);
+    println(not_eq);
+
+    // Short-circuit in while condition
+    var i: i64 = 0;
+    var done: bool = false;
+    while i < 5 && !done {
+        i = i + 1;
+        if i == 3 {
+            done = true;
+        }
+    }
+    println(i);
+}

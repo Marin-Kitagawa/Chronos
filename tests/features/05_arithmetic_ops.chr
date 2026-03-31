@@ -1,0 +1,43 @@
+// Tests: arithmetic operators +, -, *, /, %
+
+fn main() {
+    let a: i64 = 100;
+    let b: i64 = 7;
+
+    // Addition
+    let add: i64 = a + b;
+    println(add);
+
+    // Subtraction
+    let sub: i64 = a - b;
+    println(sub);
+
+    // Multiplication
+    let mul: i64 = a * b;
+    println(mul);
+
+    // Division (integer)
+    let div: i64 = a / b;
+    println(div);
+
+    // Modulo/remainder
+    let rem: i64 = a % b;
+    println(rem);
+
+    // Chained arithmetic
+    let chain: i64 = a + b * 2 - 3;
+    println(chain);
+
+    // Nested arithmetic
+    let nested: i64 = (a + b) * (a - b);
+    println(nested);
+
+    // Arithmetic in conditions
+    var x: i64 = 1;
+    var sum: i64 = 0;
+    while x <= 10 {
+        sum = sum + x;
+        x = x + 1;
+    }
+    println(sum);
+}

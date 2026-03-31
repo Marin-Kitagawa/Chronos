@@ -1,0 +1,53 @@
+// Tests: impl block and method declaration parsing.
+// Note: 'self' is a keyword and cannot be used as a parameter name.
+// Note: struct literals are not yet supported in the parser.
+// Note: '::' path separator is not in the lexer — static methods cannot be called.
+// This test verifies that impl block declarations parse without error.
+
+pub struct Counter {
+    value: i64,
+}
+
+pub struct Point {
+    x: f64,
+    y: f64,
+}
+
+pub struct Range {
+    lo: i64,
+    hi: i64,
+}
+
+impl Counter {
+    fn add(a: i64, b: i64) -> i64 {
+        return a + b;
+    }
+
+    fn multiply(a: i64, b: i64) -> i64 {
+        return a * b;
+    }
+}
+
+impl Point {
+    fn origin_x() -> f64 {
+        return 0.0;
+    }
+
+    fn origin_y() -> f64 {
+        return 0.0;
+    }
+}
+
+impl Range {
+    fn width(lo: i64, hi: i64) -> i64 {
+        return hi - lo;
+    }
+
+    fn contains(lo: i64, hi: i64, x: i64) -> bool {
+        return x >= lo && x <= hi;
+    }
+}
+
+fn main() {
+    println("impl declaration test");
+}

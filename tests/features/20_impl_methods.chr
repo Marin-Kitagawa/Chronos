@@ -1,0 +1,90 @@
+// Tests: impl blocks, method declarations, and method calls
+
+struct Counter {
+    value: i64,
+    step: i64,
+}
+
+impl Counter {
+    fn new(start: i64, step: i64) -> Counter {
+        let c: Counter = Counter { value: start, step: step };
+        return c;
+    }
+
+    fn increment(self: Counter) -> Counter {
+        let c: Counter = Counter { value: self.value + self.step, step: self.step };
+        return c;
+    }
+
+    fn decrement(self: Counter) -> Counter {
+        let c: Counter = Counter { value: self.value - self.step, step: self.step };
+        return c;
+    }
+
+    fn get(self: Counter) -> i64 {
+        return self.value;
+    }
+
+    fn reset(self: Counter) -> Counter {
+        let c: Counter = Counter { value: 0, step: self.step };
+        return c;
+    }
+}
+
+struct Vec2 {
+    x: f64,
+    y: f64,
+}
+
+impl Vec2 {
+    fn new(x: f64, y: f64) -> Vec2 {
+        let v: Vec2 = Vec2 { x: x, y: y };
+        return v;
+    }
+
+    fn dot(self: Vec2, other: Vec2) -> f64 {
+        return self.x * other.x + self.y * other.y;
+    }
+
+    fn scale(self: Vec2, factor: f64) -> Vec2 {
+        let v: Vec2 = Vec2 { x: self.x * factor, y: self.y * factor };
+        return v;
+    }
+
+    fn magnitude_sq(self: Vec2) -> f64 {
+        return self.x * self.x + self.y * self.y;
+    }
+}
+
+fn main() {
+    // Counter methods
+    let c: Counter = Counter::new(0, 1);
+    println(c.get());
+
+    let c2: Counter = c.increment();
+    println(c2.get());
+
+    let c3: Counter = c2.increment();
+    let c4: Counter = c3.increment();
+    println(c4.get());
+
+    let c5: Counter = c4.decrement();
+    println(c5.get());
+
+    let c6: Counter = c5.reset();
+    println(c6.get());
+
+    // Vec2 methods
+    let v1: Vec2 = Vec2::new(3.0, 4.0);
+    let v2: Vec2 = Vec2::new(1.0, 2.0);
+
+    let mag: f64 = v1.magnitude_sq();
+    println(mag);
+
+    let dot: f64 = v1.dot(v2);
+    println(dot);
+
+    let scaled: Vec2 = v1.scale(2.0);
+    println(scaled.x);
+    println(scaled.y);
+}

@@ -1,0 +1,55 @@
+// Tests: var bindings (mutable), assignment and reassignment
+
+fn main() {
+    // Declare and assign mutable variables
+    var count: i64 = 0;
+    println(count);
+
+    count = 1;
+    println(count);
+
+    count = count + 1;
+    println(count);
+
+    // Reassign to completely different values
+    var x: i64 = 100;
+    x = 200;
+    x = 300;
+    println(x);
+
+    // Mutable float
+    var ratio: f64 = 0.0;
+    ratio = 0.5;
+    ratio = 1.0;
+    println(ratio);
+
+    // Mutable bool
+    var flag: bool = false;
+    flag = true;
+    println(flag);
+    flag = false;
+    println(flag);
+
+    // Mutable string
+    var msg: string = "initial";
+    msg = "updated";
+    println(msg);
+
+    // Accumulator pattern
+    var total: i64 = 0;
+    var i: i64 = 1;
+    while i <= 10 {
+        total = total + i;
+        i = i + 1;
+    }
+    println(total);
+
+    // Swap pattern
+    var a: i64 = 10;
+    var b: i64 = 20;
+    let tmp: i64 = a;
+    a = b;
+    b = tmp;
+    println(a);
+    println(b);
+}

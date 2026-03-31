@@ -1,0 +1,41 @@
+// Tests: let bindings (immutable) with explicit type annotations
+
+fn main() {
+    // let bindings for each primitive type
+    let a: i8   = 1;
+    let b: i16  = 256;
+    let c: i32  = 65536;
+    let d: i64  = 1000000;
+    let e: u8   = 200;
+    let f: u16  = 50000;
+    let g: u32  = 100000;
+    let h: u64  = 999999;
+    let i: f32  = 1.5;
+    let j: f64  = 3.14159;
+    let k: bool = true;
+    let l: string = "Chronos";
+
+    println(d);
+    println(j);
+    println(k);
+    println(l);
+
+    // let used as intermediary
+    let x: i64 = 10;
+    let y: i64 = x + 5;
+    let z: i64 = x + y;
+    println(z);
+
+    // let with complex initializer
+    let computed: i64 = (x * 2) + (y - 3);
+    println(computed);
+
+    // let binding reused in multiple expressions
+    let base: i64 = 100;
+    let double: i64 = base * 2;
+    let triple: i64 = base * 3;
+    let half: i64 = base / 2;
+    println(double);
+    println(triple);
+    println(half);
+}

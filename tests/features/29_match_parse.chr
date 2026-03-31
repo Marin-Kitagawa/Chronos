@@ -1,0 +1,16 @@
+// Tests: match expression parsing
+// The C backend emits a placeholder; this verifies the parser accepts match syntax.
+
+fn main() {
+    let x: i64 = 2;
+
+    // Match expression parsed as a statement
+    match x {
+        1 => println("one"),
+        2 => println("two"),
+        3 => println("three"),
+        _ => println("other"),
+    }
+
+    println("match parse test done");
+}

@@ -1,0 +1,53 @@
+// Tests: bool type, true/false literals, boolean expressions
+
+fn negate(b: bool) -> bool {
+    return !b;
+}
+
+fn and_op(a: bool, b: bool) -> bool {
+    return a && b;
+}
+
+fn or_op(a: bool, b: bool) -> bool {
+    return a || b;
+}
+
+fn main() {
+    let t: bool = true;
+    let f: bool = false;
+
+    println(t);
+    println(f);
+
+    let nt: bool = negate(t);
+    let nf: bool = negate(f);
+    println(nt);
+    println(nf);
+
+    let tt: bool = and_op(true, true);
+    let tf: bool = and_op(true, false);
+    let ff: bool = and_op(false, false);
+    println(tt);
+    println(tf);
+    println(ff);
+
+    let ot: bool = or_op(false, true);
+    let of_: bool = or_op(false, false);
+    println(ot);
+    println(of_);
+
+    // Boolean in if condition
+    var flag: bool = true;
+    if flag {
+        println("flag is true");
+    } else {
+        println("flag is false");
+    }
+
+    flag = false;
+    if flag {
+        println("still true");
+    } else {
+        println("now false");
+    }
+}

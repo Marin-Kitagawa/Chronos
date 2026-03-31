@@ -1,0 +1,21 @@
+// Tests: nested struct declaration parsing.
+// Verifies that struct fields can reference other struct types.
+
+pub struct Inner {
+    x: f64,
+    y: f64,
+}
+
+pub struct Outer {
+    position: Inner,
+    radius: f64,
+}
+
+pub struct DeepNested {
+    outer: Outer,
+    label: string,
+}
+
+fn main() {
+    println("nested struct declaration test");
+}

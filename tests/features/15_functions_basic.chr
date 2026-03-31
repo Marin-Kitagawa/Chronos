@@ -1,0 +1,74 @@
+// Tests: function declarations, calls, return types, void functions
+
+// Void function (no return type / implicit void)
+fn print_banner() {
+    println("==========");
+}
+
+// Function returning i64
+fn double(x: i64) -> i64 {
+    return x * 2;
+}
+
+// Function returning f64
+fn half(x: f64) -> f64 {
+    return x / 2.0;
+}
+
+// Function returning bool
+fn is_even(n: i64) -> bool {
+    return n % 2 == 0;
+}
+
+// Function returning string
+fn status(ok: bool) -> string {
+    if ok {
+        return "OK";
+    } else {
+        return "FAIL";
+    }
+}
+
+// Function with multiple parameters
+fn clamp(value: i64, lo: i64, hi: i64) -> i64 {
+    if value < lo {
+        return lo;
+    }
+    if value > hi {
+        return hi;
+    }
+    return value;
+}
+
+// Function that calls other functions
+fn process(x: i64) -> i64 {
+    let d: i64 = double(x);
+    let c: i64 = clamp(d, 0, 100);
+    return c;
+}
+
+fn main() {
+    print_banner();
+
+    println(double(5));
+    println(double(0));
+    println(double(-3));
+
+    println(half(10.0));
+    println(half(3.0));
+
+    println(is_even(4));
+    println(is_even(7));
+
+    println(status(true));
+    println(status(false));
+
+    println(clamp(50, 0, 100));
+    println(clamp(-10, 0, 100));
+    println(clamp(200, 0, 100));
+
+    println(process(30));
+    println(process(75));
+
+    print_banner();
+}

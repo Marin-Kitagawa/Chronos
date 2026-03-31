@@ -1,0 +1,28 @@
+// Tests: string type, string literals, println with strings
+
+fn greet(name: string) -> string {
+    return "Hello";
+}
+
+fn describe() -> string {
+    return "Chronos";
+}
+
+fn main() {
+    let s: string = "Hello, World!";
+    println(s);
+
+    let greeting: string = greet("Chronos");
+    println(greeting);
+
+    let lang: string = describe();
+    println(lang);
+
+    // String literals directly in println
+    println("one");
+    println("two");
+    println("three");
+
+    // Multiple strings mixed in println calls
+    println("Language:", lang);
+}

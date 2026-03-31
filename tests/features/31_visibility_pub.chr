@@ -1,0 +1,43 @@
+// Tests: pub visibility modifier on functions (and struct declarations).
+
+pub fn square(x: i64) -> i64 {
+    return x * x;
+}
+
+pub fn cube(x: i64) -> i64 {
+    return x * x * x;
+}
+
+pub fn clamp(value: i64, lo: i64, hi: i64) -> i64 {
+    if value < lo {
+        return lo;
+    }
+    if value > hi {
+        return hi;
+    }
+    return value;
+}
+
+pub fn in_range(x: i64, lo: i64, hi: i64) -> bool {
+    return x >= lo && x <= hi;
+}
+
+pub struct Config {
+    width: i64,
+    height: i64,
+}
+
+fn main() {
+    println(square(5));
+    println(square(10));
+
+    println(cube(3));
+    println(cube(4));
+
+    println(clamp(50, 0, 100));
+    println(clamp(-10, 0, 100));
+    println(clamp(200, 0, 100));
+
+    println(in_range(5, 1, 10));
+    println(in_range(15, 1, 10));
+}

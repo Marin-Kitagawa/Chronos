@@ -1,0 +1,68 @@
+// Tests: comparison operators ==, !=, <, >, <=, >=
+
+fn check_equal(a: i64, b: i64) -> bool {
+    return a == b;
+}
+
+fn check_not_equal(a: i64, b: i64) -> bool {
+    return a != b;
+}
+
+fn check_less(a: i64, b: i64) -> bool {
+    return a < b;
+}
+
+fn check_greater(a: i64, b: i64) -> bool {
+    return a > b;
+}
+
+fn check_lte(a: i64, b: i64) -> bool {
+    return a <= b;
+}
+
+fn check_gte(a: i64, b: i64) -> bool {
+    return a >= b;
+}
+
+fn main() {
+    let x: i64 = 5;
+    let y: i64 = 10;
+    let z: i64 = 5;
+
+    let eq: bool  = check_equal(x, z);
+    let neq: bool = check_not_equal(x, y);
+    let lt: bool  = check_less(x, y);
+    let gt: bool  = check_greater(y, x);
+    let lte: bool = check_lte(x, z);
+    let gte: bool = check_gte(y, x);
+
+    println(eq);
+    println(neq);
+    println(lt);
+    println(gt);
+    println(lte);
+    println(gte);
+
+    // Comparisons in if conditions
+    if x < y {
+        println("x is less");
+    }
+
+    if x == z {
+        println("x equals z");
+    }
+
+    if y != x {
+        println("y differs from x");
+    }
+
+    // Float comparisons
+    let fa: f64 = 1.5;
+    let fb: f64 = 2.5;
+    if fa < fb {
+        println("fa less than fb");
+    }
+    if fa <= 1.5 {
+        println("fa equals 1.5");
+    }
+}

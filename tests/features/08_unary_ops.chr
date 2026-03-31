@@ -1,0 +1,54 @@
+// Tests: unary operators — negation (-) and logical NOT (!)
+
+fn negate_int(x: i64) -> i64 {
+    return -x;
+}
+
+fn negate_float(x: f64) -> f64 {
+    return -x;
+}
+
+fn logical_not(b: bool) -> bool {
+    return !b;
+}
+
+fn main() {
+    // Unary integer negation
+    let pos: i64 = 42;
+    let neg: i64 = -pos;
+    println(pos);
+    println(neg);
+
+    let via_fn: i64 = negate_int(100);
+    println(via_fn);
+
+    // Negation of negative (double negation)
+    let double_neg: i64 = negate_int(-7);
+    println(double_neg);
+
+    // Unary float negation
+    let fpos: f64 = 3.14;
+    let fneg: f64 = negate_float(fpos);
+    println(fneg);
+
+    // Logical NOT
+    let yes: bool = true;
+    let no: bool = logical_not(yes);
+    println(no);
+
+    let also_no: bool = !true;
+    let also_yes: bool = !false;
+    println(also_no);
+    println(also_yes);
+
+    // NOT in while condition
+    var found: bool = false;
+    var i: i64 = 0;
+    while !found {
+        i = i + 1;
+        if i >= 5 {
+            found = true;
+        }
+    }
+    println(i);
+}

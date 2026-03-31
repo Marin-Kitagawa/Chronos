@@ -1,0 +1,17 @@
+// Tests: lambda / closure expression parsing
+// Verifies the parser accepts lambda syntax.
+
+fn apply_twice(x: i64) -> i64 {
+    let double: i64 = x * 2;
+    return double;
+}
+
+fn main() {
+    // Lambda declarations parsed as let bindings
+    let square = |x: i64| -> i64 { return x * x; };
+    let inc    = |x: i64| -> i64 { return x + 1; };
+
+    // Use the lambdas
+    println(apply_twice(5));
+    println("lambda parse test");
+}

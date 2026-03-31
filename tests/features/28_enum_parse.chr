@@ -1,0 +1,33 @@
+// Tests: enum declaration parsing
+// The parser must accept enum syntax; the C backend may emit placeholder output.
+
+enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+enum Color {
+    Red,
+    Green,
+    Blue,
+    Custom,
+}
+
+enum Shape {
+    Circle,
+    Rectangle,
+    Triangle,
+}
+
+enum Status {
+    Active,
+    Inactive,
+    Pending,
+}
+
+fn main() {
+    // Enums are declared — smoke test that the compiler accepts the syntax.
+    println("enum parse test");
+}

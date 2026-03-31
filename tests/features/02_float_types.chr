@@ -1,0 +1,51 @@
+// Tests: floating-point types f32 and f64
+// Arithmetic, assignment, and printing of float values.
+
+fn add_f32(a: f32, b: f32) -> f32 {
+    return a + b;
+}
+
+fn add_f64(a: f64, b: f64) -> f64 {
+    return a + b;
+}
+
+fn mul_f64(a: f64, b: f64) -> f64 {
+    return a * b;
+}
+
+fn sub_f64(a: f64, b: f64) -> f64 {
+    return a - b;
+}
+
+fn div_f64(a: f64, b: f64) -> f64 {
+    return a / b;
+}
+
+fn main() {
+    let x: f32 = 1.5;
+    let y: f32 = 2.5;
+    let sum32: f32 = add_f32(x, y);
+    println(sum32);
+
+    let a: f64 = 3.14;
+    let b: f64 = 2.71;
+    let sum64: f64 = add_f64(a, b);
+    println(sum64);
+
+    let product: f64 = mul_f64(3.0, 4.0);
+    println(product);
+
+    let diff: f64 = sub_f64(10.0, 3.5);
+    println(diff);
+
+    let quotient: f64 = div_f64(9.0, 2.0);
+    println(quotient);
+
+    // Float comparisons
+    var p: f64 = 0.0;
+    var q: f64 = 1.0;
+    while p < q {
+        p = p + 0.5;
+    }
+    println(p);
+}

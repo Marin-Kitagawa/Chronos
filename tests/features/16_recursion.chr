@@ -1,0 +1,66 @@
+// Tests: recursive function calls
+
+fn fib(n: i64) -> i64 {
+    if n <= 1 {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+fn factorial(n: i64) -> i64 {
+    if n <= 1 {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+fn sum(n: i64) -> i64 {
+    if n <= 0 {
+        return 0;
+    }
+    return n + sum(n - 1);
+}
+
+fn power(base: i64, exp: i64) -> i64 {
+    if exp == 0 {
+        return 1;
+    }
+    return base * power(base, exp - 1);
+}
+
+fn gcd(a: i64, b: i64) -> i64 {
+    if b == 0 {
+        return a;
+    }
+    return gcd(b, a % b);
+}
+
+fn main() {
+    // Fibonacci sequence
+    var i: i64 = 0;
+    while i <= 10 {
+        println(fib(i));
+        i = i + 1;
+    }
+
+    // Factorial
+    println(factorial(1));
+    println(factorial(5));
+    println(factorial(10));
+
+    // Sum from 1..N
+    println(sum(10));
+    println(sum(100));
+
+    // Powers of 2
+    var exp: i64 = 0;
+    while exp <= 8 {
+        println(power(2, exp));
+        exp = exp + 1;
+    }
+
+    // GCD
+    println(gcd(48, 18));
+    println(gcd(100, 75));
+    println(gcd(17, 13));
+}

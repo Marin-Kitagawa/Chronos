@@ -1,0 +1,54 @@
+// Tests: functions with multiple parameters of different types
+
+fn add3(a: i64, b: i64, c: i64) -> i64 {
+    return a + b + c;
+}
+
+fn weighted_sum(a: f64, wa: f64, b: f64, wb: f64) -> f64 {
+    return a * wa + b * wb;
+}
+
+fn between(x: i64, lo: i64, hi: i64) -> bool {
+    return x >= lo && x <= hi;
+}
+
+fn greet_n(name: string, times: i64) -> i64 {
+    var i: i64 = 0;
+    while i < times {
+        println(name);
+        i = i + 1;
+    }
+    return times;
+}
+
+fn slope(m: f64, x: f64, b: f64) -> f64 {
+    return m * x + b;
+}
+
+fn select(cond: bool, a: i64, b: i64) -> i64 {
+    if cond {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+fn main() {
+    println(add3(1, 2, 3));
+    println(add3(10, 20, 30));
+
+    println(weighted_sum(1.0, 0.5, 2.0, 0.5));
+
+    println(between(5, 1, 10));
+    println(between(0, 1, 10));
+    println(between(10, 1, 10));
+
+    let n: i64 = greet_n("hi", 3);
+    println(n);
+
+    println(slope(2.0, 3.0, 1.0));
+    println(slope(0.0, 100.0, 42.0));
+
+    println(select(true, 100, 200));
+    println(select(false, 100, 200));
+}

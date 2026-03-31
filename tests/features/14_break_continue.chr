@@ -1,0 +1,69 @@
+// Tests: break and continue statements in loops
+
+fn first_multiple_of(divisor: i64, limit: i64) -> i64 {
+    var i: i64 = 1;
+    while i <= limit {
+        if i % divisor == 0 {
+            return i;
+        }
+        i = i + 1;
+    }
+    return -1;
+}
+
+fn sum_odd(limit: i64) -> i64 {
+    var total: i64 = 0;
+    var i: i64 = 0;
+    while i <= limit {
+        i = i + 1;
+        if i % 2 == 0 {
+            continue;
+        }
+        total = total + i;
+    }
+    return total;
+}
+
+fn main() {
+    // break: exit loop early
+    var i: i64 = 0;
+    while i < 100 {
+        if i == 5 {
+            break;
+        }
+        i = i + 1;
+    }
+    println(i);
+
+    // continue: skip even numbers, sum odds
+    let odd_sum: i64 = sum_odd(10);
+    println(odd_sum);
+
+    // Nested loops — break only exits inner loop
+    var outer: i64 = 0;
+    var count: i64 = 0;
+    while outer < 5 {
+        var inner: i64 = 0;
+        while inner < 10 {
+            if inner == 3 {
+                break;
+            }
+            count = count + 1;
+            inner = inner + 1;
+        }
+        outer = outer + 1;
+    }
+    println(count);
+
+    // Continue in counting loop
+    var evens: i64 = 0;
+    var j: i64 = 0;
+    while j < 20 {
+        j = j + 1;
+        if j % 2 != 0 {
+            continue;
+        }
+        evens = evens + 1;
+    }
+    println(evens);
+}

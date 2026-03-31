@@ -1,0 +1,69 @@
+// Tests: structs whose fields are other struct types (nested structs)
+
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+struct Circle {
+    center: Point,
+    radius: f64,
+}
+
+struct LineSegment {
+    start: Point,
+    end: Point,
+}
+
+impl Point {
+    fn new(x: f64, y: f64) -> Point {
+        let p: Point = Point { x: x, y: y };
+        return p;
+    }
+
+    fn distance_sq(self: Point, other: Point) -> f64 {
+        let dx: f64 = self.x - other.x;
+        let dy: f64 = self.y - other.y;
+        return dx * dx + dy * dy;
+    }
+}
+
+impl Circle {
+    fn area(self: Circle) -> f64 {
+        // pi approximation
+        let pi: f64 = 3.14159265;
+        return pi * self.radius * self.radius;
+    }
+}
+
+impl LineSegment {
+    fn length_sq(self: LineSegment) -> f64 {
+        return self.start.distance_sq(self.end);
+    }
+}
+
+fn main() {
+    let origin: Point = Point::new(0.0, 0.0);
+    let p1: Point = Point::new(3.0, 4.0);
+
+    // Access nested field
+    let c: Circle = Circle { center: origin, radius: 5.0 };
+    println(c.center.x);
+    println(c.center.y);
+    println(c.radius);
+    println(c.area());
+
+    // Line segment
+    let seg: LineSegment = LineSegment { start: origin, end: p1 };
+    let len_sq: f64 = seg.length_sq();
+    println(len_sq);
+
+    // Nested field access chain
+    println(seg.start.x);
+    println(seg.end.x);
+    println(seg.end.y);
+
+    // Nested struct passed to method
+    let dist: f64 = c.center.distance_sq(p1);
+    println(dist);
+}

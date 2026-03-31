@@ -1,0 +1,67 @@
+// Tests: struct declarations, struct literals, and field access
+
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+struct Rectangle {
+    width: f64,
+    height: f64,
+}
+
+struct Color {
+    r: i64,
+    g: i64,
+    b: i64,
+}
+
+struct Person {
+    age: i64,
+    score: f64,
+    active: bool,
+}
+
+fn make_point(x: f64, y: f64) -> Point {
+    let p: Point = Point { x: x, y: y };
+    return p;
+}
+
+fn rect_area(r: Rectangle) -> f64 {
+    return r.width * r.height;
+}
+
+fn rect_perimeter(r: Rectangle) -> f64 {
+    return 2.0 * (r.width + r.height);
+}
+
+fn main() {
+    // Struct literal creation
+    let p: Point = Point { x: 3.0, y: 4.0 };
+    println(p.x);
+    println(p.y);
+
+    // Struct through function
+    let q: Point = make_point(1.0, 2.0);
+    println(q.x);
+    println(q.y);
+
+    // Rectangle
+    let rect: Rectangle = Rectangle { width: 5.0, height: 3.0 };
+    let area: f64 = rect_area(rect);
+    let perim: f64 = rect_perimeter(rect);
+    println(area);
+    println(perim);
+
+    // Color struct with integers
+    let red: Color = Color { r: 255, g: 0, b: 0 };
+    let green: Color = Color { r: 0, g: 255, b: 0 };
+    println(red.r);
+    println(green.g);
+
+    // Mixed-type struct
+    let person: Person = Person { age: 30, score: 9.5, active: true };
+    println(person.age);
+    println(person.score);
+    println(person.active);
+}

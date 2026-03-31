@@ -1,0 +1,11 @@
+// Tests: for-in loop parsing
+// The C backend emits a comment placeholder; this verifies the parser accepts for syntax.
+
+fn main() {
+    // for-in over a range expression
+    for i in 0..10 {
+        println(i);
+    }
+
+    println("for loop parse test done");
+}

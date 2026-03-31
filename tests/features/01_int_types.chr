@@ -1,0 +1,76 @@
+// Tests: integer types i8, i16, i32, i64, u8, u16, u32, u64
+// Every signed and unsigned integer primitive type is declared and used.
+
+fn add_i8(a: i8, b: i8) -> i8 {
+    return a + b;
+}
+
+fn add_i16(a: i16, b: i16) -> i16 {
+    return a + b;
+}
+
+fn add_i32(a: i32, b: i32) -> i32 {
+    return a + b;
+}
+
+fn add_i64(a: i64, b: i64) -> i64 {
+    return a + b;
+}
+
+fn add_u8(a: u8, b: u8) -> u8 {
+    return a + b;
+}
+
+fn add_u16(a: u16, b: u16) -> u16 {
+    return a + b;
+}
+
+fn add_u32(a: u32, b: u32) -> u32 {
+    return a + b;
+}
+
+fn add_u64(a: u64, b: u64) -> u64 {
+    return a + b;
+}
+
+fn main() {
+    let a: i8  = 10;
+    let b: i8  = 20;
+    let r8: i8 = add_i8(a, b);
+    println(r8);
+
+    let c: i16  = 100;
+    let d: i16  = 200;
+    let r16: i16 = add_i16(c, d);
+    println(r16);
+
+    let e: i32  = 1000;
+    let f: i32  = 2000;
+    let r32: i32 = add_i32(e, f);
+    println(r32);
+
+    let g: i64  = 10000;
+    let h: i64  = 20000;
+    let r64: i64 = add_i64(g, h);
+    println(r64);
+
+    let ua: u8  = 5;
+    let ub: u8  = 10;
+    let ur8: u8 = add_u8(ua, ub);
+    println(ur8);
+
+    let uc: u16 = 50;
+    let ud: u16 = 100;
+    let ur16: u16 = add_u16(uc, ud);
+    println(ur16);
+
+    let ue: u32 = 500;
+    let uf: u32 = 1000;
+    let ur32: u32 = add_u32(ue, uf);
+    println(ur32);
+
+    let ug: u64 = 5000;
+    let uh: u64 = 10000;
+    let ur64: u64 = add_u64(ug, uh);
+    println(ur64);
+}
