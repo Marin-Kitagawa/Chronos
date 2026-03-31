@@ -2152,21 +2152,42 @@ Computes worst-case execution time bounds for real-time code:
 [[workspace-layout]]
 == Cargo Workspace Layout
 
-The Chronos compiler is organized as a Cargo workspace. Source files are kept as standalone `.rs` files at the root; each crate wraps one or more of them via Rust's `include!()` macro.
+The Chronos compiler is organized as a Cargo workspace. Canonical source files live under `src/` organised by concern; each crate in `crates/` wraps one or more of them via Rust's `include!()` macro.
 
 [source]
 ----
 Chronos Programming Language/
 ├── Cargo.toml                    ← workspace manifest
-├── chronos-lexer.rs              ← source files (flat, canonical)
-├── chronos-parser.rs
-├── chronos-type-inference.rs
-├── chronos-ir-codegen.rs
-├── chronos-security-realtime.rs
-├── chronos-unified-integration.rs
-├── chronos-c-backend.rs
-├── chronos-stdlib-types.rs
-├── chronos-*-engine.rs           ← 24 domain engines
+│
+├── src/
+│   ├── compiler/                 ← compiler pipeline (11 files)
+│   │   ├── chronos-lexer.rs
+│   │   ├── chronos-lexer-v2.rs
+│   │   ├── chronos-parser.rs
+│   │   ├── chronos-parser-v2.rs
+│   │   ├── chronos-type-inference.rs
+│   │   ├── chronos-inference-ir-v2.rs
+│   │   ├── chronos-ir-codegen.rs
+│   │   ├── chronos-security-realtime.rs
+│   │   ├── chronos-unified-integration.rs
+│   │   ├── chronos-stdlib-types.rs
+│   │   └── chronos-c-backend.rs
+│   ├── engines/                  ← domain engines (25 files)
+│   │   ├── chronos-graph-engine.rs
+│   │   ├── chronos-cas-engine.rs
+│   │   ├── chronos-network-engine.rs
+│   │   ├── chronos-os-engine.rs
+│   │   ├── chronos-distributed-engine.rs
+│   │   ├── chronos-blockchain-engine.rs
+│   │   ├── chronos-proof-engine.rs
+│   │   ├── chronos-quantum-engine.rs
+│   │   ├── chronos-simulation-datascience.rs
+│   │   └── ...
+│   └── tooling/                  ← build, docs, testing (4 files)
+│       ├── chronos-build-system.rs
+│       ├── chronos-documentation-system.rs
+│       ├── chronos-testing-framework.rs
+│       └── chronos-missing-features-1.rs
 │
 ├── crates/
 │   ├── compiler/
@@ -2184,7 +2205,7 @@ Chronos Programming Language/
 │   ├── engines/
 │   │   ├── chronos-graph/
 │   │   ├── chronos-cas/
-│   │   └── ...                      ← 24 engine crates
+│   │   └── ...                      ← 9 engine crates
 │   ├── tooling/
 │   │   ├── chronos-build/
 │   │   ├── chronos-testing/
@@ -2252,24 +2273,24 @@ The `generated_code` map is keyed by back-end name: `"c"` for the C back-end, `"
 [[include-order]]
 == compiler-core Include Order
 
-The `chronos-compiler-core` crate includes all pipeline files sequentially in a single Rust module, so every type defined in an earlier file is in scope for all later files:
+The `chronos-compiler-core` crate includes all pipeline files sequentially in a single Rust module via relative `include!()` paths under `src/compiler/`, so every type defined in an earlier file is in scope for all later files:
 
-[cols="1,2", options="header"]
+[cols="1,3", options="header"]
 |===
-|Step |File
+|Step |File (relative to workspace root)
 
-|1 |`chronos-lexer.rs` — defines `Token`, `Lexer`, `SpannedToken`
-|2 |`chronos-stdlib-types.rs` — universal `ChronosType` enum
-|3 |`missing_types.rs` — AST nodes: `Expression`, `Statement`, `Program`, `BinOp`, …
-|4 |`chronos-parser.rs` — recursive descent / Pratt parser
-|5 |`chronos-parser-v2.rs` — extended parser for domain-specific syntax
-|6 |`chronos-type-inference.rs` — Hindley-Milner + effects + taint
-|7 |`chronos-inference-ir-v2.rs` — V2 type rules
-|8 |`chronos-ir-codegen.rs` — SSA IR + LLVM / CUDA back-ends
-|9 |`chronos-security-realtime.rs` — 9-pass audit + WCET analysis
-|10|`chronos-unified-integration.rs` — `compile()` orchestrator
-|11|`chronos-c-backend.rs` — C99 code generator
-|12|`missing_types_late.rs` — wrapper types delegating to real implementations
+|1  |`src/compiler/chronos-lexer.rs` — defines `Token`, `Lexer`, `SpannedToken`
+|2  |`src/compiler/chronos-stdlib-types.rs` — universal `ChronosType` enum
+|3  |`missing_types.rs` — AST nodes: `Expression`, `Statement`, `Program`, `BinOp`, … _(in crate src/)_
+|4  |`src/compiler/chronos-parser.rs` — recursive descent / Pratt parser
+|5  |`src/compiler/chronos-parser-v2.rs` — extended parser for domain-specific syntax
+|6  |`src/compiler/chronos-type-inference.rs` — Hindley-Milner + effects + taint
+|7  |`src/compiler/chronos-inference-ir-v2.rs` — V2 type rules
+|8  |`src/compiler/chronos-ir-codegen.rs` — SSA IR + LLVM / CUDA back-ends
+|9  |`src/compiler/chronos-security-realtime.rs` — 9-pass audit + WCET analysis
+|10 |`src/compiler/chronos-unified-integration.rs` — `compile()` orchestrator
+|11 |`src/compiler/chronos-c-backend.rs` — C99 code generator
+|12 |`missing_types_late.rs` — wrapper types delegating to real implementations _(in crate src/)_
 |===
 
 [[compiler-config]]
