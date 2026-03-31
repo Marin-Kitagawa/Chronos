@@ -1,0 +1,2406 @@
+= Chronos Programming Language Reference Manual
+:doctype: book
+:toc: left
+:toc-title: Contents
+:toclevels: 3
+:sectnums:
+:sectnumlevels: 3
+:source-highlighter: rouge
+:icons: font
+:experimental:
+:imagesdir: images
+:chronos-version: 0.1.0
+
+[abstract]
+Chronos is a next-generation systems programming language that unifies features from C++, Rust, Scala, Kotlin, TypeScript, and AI frameworks into a single cohesive language. It provides a universal type system, tracked side effects, linear and affine memory management, first-class GPU and AI primitives, formal verification support, and 24 built-in domain engines covering everything from graph algorithms to quantum simulation.
+
+This manual is the authoritative reference for the Chronos language and its compiler toolchain.
+
+'''
+
+// ============================================================
+// PART I: GETTING STARTED
+// ============================================================
+
+[[part-getting-started]]
+= Part I: Getting Started
+
+[[installation]]
+== Installation
+
+=== Prerequisites
+
+[cols="1,2,1", options="header"]
+|===
+|Dependency |Purpose |Required
+
+|Rust toolchain (stable)
+|Building the compiler itself
+|Yes
+
+|MSVC Build Tools _or_ GCC / Clang
+|Compiling the C code emitted by the Chronos back-end
+|Yes
+
+|Windows 10 / 11 (for MSVC path)
+|Native Windows compilation via `cl.exe`
+|MSVC only
+|===
+
+On Windows the compiler automatically locates `cl.exe` in the standard Visual Studio installation paths.
+On Linux and macOS it invokes `cc` (GCC or Clang).
+
+=== Building the Compiler
+
+[source,shell]
+----
+git clone https://github.com/chronos-lang/chronos
+cd chronos
+cargo build --release -p chronos-cli
+----
+
+The resulting binary is placed at `target/release/chronos` (or `chronos.exe` on Windows).
+Add it to your `PATH` to use the `chronos` command globally.
+
+=== Verifying the Installation
+
+[source,shell]
+----
+chronos version
+# Chronos 0.1.0
+----
+
+[[quick-start]]
+== Quick Start
+
+=== Your First Program
+
+Create a file named `hello.chr`:
+
+[source,chronos]
+----
+fn main() {
+    let message: string = "Hello, Chronos!";
+    println(message);
+}
+----
+
+Compile and run it:
+
+[source,shell]
+----
+chronos run hello.chr
+# Hello, Chronos!
+----
+
+Or compile to a binary and run separately:
+
+[source,shell]
+----
+chronos build hello.chr
+./hello
+----
+
+=== A More Complete Example
+
+[source,chronos]
+----
+// fibonacci.chr — demonstrates functions, loops, and mutable variables
+
+fn fib_recursive(n: i64) -> i64 {
+    if n <= 1 {
+        return n;
+    }
+    return fib_recursive(n - 1) + fib_recursive(n - 2);
+}
+
+fn fib_iterative(n: i64) -> i64 {
+    if n <= 1 {
+        return n;
+    }
+    var a: i64 = 0;
+    var b: i64 = 1;
+    var i: i64 = 2;
+    while i <= n {
+        let tmp: i64 = a + b;
+        a = b;
+        b = tmp;
+        i = i + 1;
+    }
+    return b;
+}
+
+fn main() {
+    var idx: i64 = 0;
+    while idx <= 10 {
+        let r:  i64 = fib_recursive(idx);
+        let it: i64 = fib_iterative(idx);
+        println(idx, r, it);
+        idx = idx + 1;
+    }
+}
+----
+
+[source,shell]
+----
+chronos run fibonacci.chr
+# 0  0  0
+# 1  1  1
+# 2  1  1
+# ...
+# 10 55 55
+----
+
+'''
+
+// ============================================================
+// PART II: LANGUAGE REFERENCE
+// ============================================================
+
+[[part-language]]
+= Part II: Language Reference
+
+[[lexical-structure]]
+== Lexical Structure
+
+=== Source Encoding
+
+Chronos source files are UTF-8 encoded. The conventional file extension is `.chr`.
+
+=== Comments
+
+[source,chronos]
+----
+// Single-line comment — extends to end of line
+
+/* Block comment — can span
+   multiple lines */
+----
+
+Block comments do not nest.
+
+=== Whitespace
+
+Horizontal whitespace (spaces, tabs) is ignored except as a separator between tokens.
+Newlines are significant only in limited contexts (e.g., implicit semicolon insertion is not performed; all statements require an explicit terminator or closing brace).
+
+=== Identifiers
+
+An identifier starts with a letter (`a–z`, `A–Z`) or an underscore (`_`), followed by any combination of letters, digits (`0–9`), and underscores.
+
+[source,chronos]
+----
+my_variable
+_private
+CamelCase
+x1
+----
+
+=== Literals
+
+==== Integer Literals
+
+[cols="1,2,2", options="header"]
+|===
+|Form |Example |Description
+
+|Decimal
+|`42`, `1_000_000`
+|Digits `0–9`, underscore separators allowed
+
+|Hexadecimal
+|`0xFF`, `0x1A_2B`
+|Prefix `0x` or `0X`
+
+|Octal
+|`0o77`, `0o755`
+|Prefix `0o` or `0O`
+
+|Binary
+|`0b1010`, `0b1111_0000`
+|Prefix `0b` or `0B`
+|===
+
+The type of an integer literal is inferred from context; it defaults to `i64`.
+
+==== Float Literals
+
+[source,chronos]
+----
+3.14
+1.0e10
+1e-3
+0.5
+----
+
+The type defaults to `f64`.
+
+==== String Literals
+
+[cols="1,2,2", options="header"]
+|===
+|Form |Example |Description
+
+|Standard
+|`"hello\nworld"`
+|Double-quoted; supports escape sequences
+
+|Raw
+|`r"no \escapes"`
+|`r"..."` prefix; backslashes are literal
+
+|Multi-line
+|`"""line one`
+`line two"""`
+|Triple-quoted; preserves newlines
+|===
+
+Common escape sequences: `\n`, `\r`, `\t`, `\\`, `\"`, `\xNN`, `\uNNNN`.
+
+==== Character Literals
+
+[source,chronos]
+----
+'a'
+'\n'
+'\x41'   // 'A'
+----
+
+==== Boolean Literals
+
+`true` and `false`.
+
+[[types]]
+== Type System
+
+Chronos has a rich static type system that combines ideas from Haskell (Hindley-Milner inference), Rust (ownership, lifetimes), Scala/Kotlin (data classes, sealed hierarchies), and dependent type theory (proof engine integration).
+
+=== Primitive Types
+
+==== Integer Types
+
+[cols="1,2,2", options="header"]
+|===
+|Type |Width |Range
+
+|`i8`  |8-bit signed   |−128 to 127
+|`i16` |16-bit signed  |−32,768 to 32,767
+|`i32` |32-bit signed  |−2^31 to 2^31−1
+|`i64` |64-bit signed  |−2^63 to 2^63−1
+|`i128`|128-bit signed |−2^127 to 2^127−1
+|`int` |Arbitrary precision |Unbounded
+|`u8`  |8-bit unsigned  |0 to 255
+|`u16` |16-bit unsigned |0 to 65,535
+|`u32` |32-bit unsigned |0 to 2^32−1
+|`u64` |64-bit unsigned |0 to 2^64−1
+|`u128`|128-bit unsigned|0 to 2^128−1
+|`uint`|Arbitrary precision|≥ 0
+|`usize`|Pointer-sized unsigned|Platform-dependent
+|`isize`|Pointer-sized signed|Platform-dependent
+|===
+
+==== Float Types
+
+[cols="1,2,2", options="header"]
+|===
+|Type |Width |Notes
+
+|`f16`  |16-bit IEEE 754 half precision   |
+|`f32`  |32-bit IEEE 754 single precision |
+|`f64`  |64-bit IEEE 754 double precision |Default float type
+|`f128` |128-bit IEEE 754 quad precision  |
+|`bf16` |16-bit Brain Float               |For ML/AI workloads
+|===
+
+==== Other Primitives
+
+[cols="1,3", options="header"]
+|===
+|Type |Description
+
+|`bool`   |Boolean: `true` or `false`
+|`char`   |Unicode scalar value (32-bit)
+|`str`    |Borrowed string slice (UTF-8)
+|`string` |Owned heap-allocated UTF-8 string
+|`void`   |The unit/empty type; used for functions with no return value
+|`never`  |The bottom type; the type of expressions that never produce a value (diverge, panic, infinite loop)
+|===
+
+=== Compound Types
+
+==== Tuples
+
+[source,chronos]
+----
+let pair: (i32, string) = (42, "hello");
+let triple: (f64, f64, f64) = (1.0, 2.0, 3.0);
+----
+
+==== Arrays
+
+Fixed-length, stack-allocated sequences:
+
+[source,chronos]
+----
+let arr: [i32; 5] = [1, 2, 3, 4, 5];
+----
+
+==== Slices
+
+Dynamically-sized views into a sequence:
+
+[source,chronos]
+----
+let s: [i32] = arr[1..4];
+----
+
+==== Optional / Nullable
+
+[source,chronos]
+----
+let maybe: i32? = some(42);
+let nothing: i32? = none;
+----
+
+The postfix `?` syntax is shorthand for `Optional<T>`.
+
+=== Function Types
+
+[source,chronos]
+----
+let f: fn(i32, i32) -> i32 = |a, b| a + b;
+----
+
+Function types may carry an effect signature:
+
+[source,chronos]
+----
+let g: fn(string) -> void / IO;
+----
+
+=== Memory Ownership Types
+
+Chronos provides three ownership qualifiers that eliminate garbage collection:
+
+[cols="1,2,2", options="header"]
+|===
+|Qualifier |Semantics |C++ analogy
+
+|`T` (default)
+|Owned value; moved or copied
+|Value type / `unique_ptr`
+
+|`linear T`
+|Must be consumed exactly once
+|Move-only with mandatory use
+
+|`affine T`
+|May be consumed at most once
+|`unique_ptr` (optional drop)
+|===
+
+[source,chronos]
+----
+let buf: linear [u8; 1024] = allocate_buffer();
+process(buf);   // buf is consumed here; cannot use again
+
+let handle: affine File = open("log.txt");
+// handle may be dropped without explicit consumption
+----
+
+=== References
+
+[source,chronos]
+----
+let x: i32 = 10;
+let r: &i32 = &x;          // immutable borrow
+let rw: &mut i32 = &mut x; // mutable borrow
+----
+
+=== Tensor Types
+
+First-class tensors for GPU/ML code:
+
+[source,chronos]
+----
+let weights: tensor<f32, [768, 3072]>;
+let image:   tensor<f32, [N, C, H, W]>;   // symbolic shape
+let output:  tensor<f32, [_]>;             // dynamic shape
+----
+
+A tensor type carries its element type, shape, and target device.
+
+=== Generic Types
+
+[source,chronos]
+----
+struct Pair<A, B> {
+    first:  A,
+    second: B,
+}
+
+fn identity<T>(x: T) -> T {
+    return x;
+}
+
+fn show<T: Display>(value: T) where T: Clone {
+    println(value.to_string());
+}
+----
+
+=== Type Aliases
+
+[source,chronos]
+----
+type Meters = f64;
+type Grid<T> = Vec<Vec<T>>;
+type Callback = fn(i32) -> void;
+----
+
+=== Effects
+
+Every function type may carry an effect set — a compile-tracked annotation of observable side effects:
+
+[cols="1,3", options="header"]
+|===
+|Effect |Meaning
+
+|`IO`       |Reads or writes I/O (files, stdin/stdout, etc.)
+|`Alloc`    |Performs heap allocation
+|`Async`    |Suspends execution (coroutine / future)
+|`Gpu`      |Executes on a GPU
+|`Tpu`      |Executes on a TPU
+|`Npu`      |Executes on an NPU
+|`Network`  |Accesses the network
+|`Throw(E)` |May throw an exception of type `E`
+|`Diverge`  |May not terminate
+|`Quantum`  |Uses quantum operations
+|`Pure`     |No observable side effects
+|`Custom(s)`|User-defined effect label
+|===
+
+[source,chronos]
+----
+pure fn add(a: i32, b: i32) -> i32 {
+    return a + b;
+}
+
+async fn fetch(url: string) -> string / IO, Network, Alloc {
+    // ...
+}
+----
+
+[[variables]]
+== Variables and Bindings
+
+=== Immutable Bindings (`let`)
+
+[source,chronos]
+----
+let x: i32 = 42;
+let name: string = "Alice";
+let computed = some_function();   // type inferred
+----
+
+`let` bindings are immutable by default. The type annotation is optional when it can be inferred.
+
+=== Mutable Bindings (`var`)
+
+[source,chronos]
+----
+var counter: i64 = 0;
+counter = counter + 1;
+counter += 1;    // compound assignment
+----
+
+`var` declares a mutable variable. All mutation requires the `var` keyword at the declaration site.
+
+=== `val` — Immutable Binding (Scala/Kotlin style)
+
+`val` is an alias for `let`.
+
+=== `const` — Compile-Time Constants
+
+[source,chronos]
+----
+const MAX_SIZE: usize = 1024;
+const PI: f64 = 3.14159265358979;
+----
+
+`const` values are evaluated at compile time and inlined at every use site.
+
+=== Assignment and Compound Assignment
+
+[cols="1,2", options="header"]
+|===
+|Operator |Meaning
+
+|`x = expr`  |Assign
+|`x += expr` |Add and assign
+|`x -= expr` |Subtract and assign
+|`x *= expr` |Multiply and assign
+|`x /= expr` |Divide and assign
+|`x %= expr` |Modulo and assign
+|===
+
+[[functions]]
+== Functions
+
+=== Basic Declaration
+
+[source,chronos]
+----
+fn add(a: i32, b: i32) -> i32 {
+    return a + b;
+}
+
+fn greet(name: string) {
+    println("Hello, ", name);
+}
+----
+
+The return type follows `->`. It may be omitted when the function returns `void`.
+Both `fn` and `fun` are accepted as the function keyword.
+
+=== Expression-Body Shorthand
+
+[source,chronos]
+----
+fn square(x: i32) -> i32 = x * x;
+----
+
+=== Visibility Modifiers
+
+[source,chronos]
+----
+pub fn public_api() { }
+private fn internal_helper() { }
+protected fn subclass_api() { }
+internal fn module_api() { }
+crate fn crate_api() { }
+----
+
+=== Async Functions
+
+[source,chronos]
+----
+async fn fetch_data(url: string) -> string {
+    let response = await http_get(url);
+    return response.body;
+}
+----
+
+=== Inline and Constexpr
+
+[source,chronos]
+----
+inline fn hot_path(x: i32) -> i32 { return x * 2; }
+constexpr fn factorial(n: u32) -> u32 { /* ... */ }
+----
+
+=== Operator Overloading
+
+[source,chronos]
+----
+operator fn +(self: Vec2, other: Vec2) -> Vec2 {
+    return Vec2 { x: self.x + other.x, y: self.y + other.y };
+}
+----
+
+=== Degradable Functions
+
+Functions annotated with `degradable` carry an expiry date. The compiler emits warnings as the expiry approaches and errors once it passes.
+
+[source,chronos]
+----
+@expires("2027-01-01")
+@warns("2026-06-01")
+@replaces("new_compute")
+degradable fn old_compute(x: f32) -> f32 {
+    // ...
+}
+----
+
+[[control-flow]]
+== Control Flow
+
+=== `if` / `else if` / `else`
+
+[source,chronos]
+----
+if score >= 90 {
+    println("A");
+} else if score >= 80 {
+    println("B");
+} else {
+    println("C");
+}
+----
+
+Conditions do not require parentheses. `if` is also an expression:
+
+[source,chronos]
+----
+let label: string = if x > 0 { "positive" } else { "non-positive" };
+----
+
+=== `while`
+
+[source,chronos]
+----
+var i: i64 = 0;
+while i < 10 {
+    println(i);
+    i += 1;
+}
+----
+
+=== `for` / `in`
+
+[source,chronos]
+----
+for item in collection {
+    println(item);
+}
+
+for i in 0..10 {    // range: exclusive upper bound
+    println(i);
+}
+
+for i in 0..=10 {   // range: inclusive upper bound
+    println(i);
+}
+----
+
+=== `loop`
+
+An infinite loop that must be exited with `break` or `return`:
+
+[source,chronos]
+----
+loop {
+    let input = read_line();
+    if input == "quit" {
+        break;
+    }
+}
+----
+
+=== `break` and `continue`
+
+[source,chronos]
+----
+while condition {
+    if skip_this { continue; }
+    if stop_now  { break; }
+    process();
+}
+----
+
+=== `return`
+
+[source,chronos]
+----
+fn find(haystack: [i32], needle: i32) -> i32? {
+    for item in haystack {
+        if item == needle { return some(item); }
+    }
+    return none;
+}
+----
+
+=== `match` / `when`
+
+[source,chronos]
+----
+match direction {
+    Direction::North => move_north(),
+    Direction::South => move_south(),
+    Direction::East | Direction::West => move_horizontal(),
+    _ => println("unknown"),
+}
+----
+
+`when` is an accepted alias for `match` (Kotlin style).
+
+Guards narrow a pattern further:
+
+[source,chronos]
+----
+match value {
+    x if x < 0  => println("negative"),
+    0            => println("zero"),
+    x if x > 100 => println("large"),
+    x            => println(x),
+}
+----
+
+=== `try` / `catch` / `finally`
+
+[source,chronos]
+----
+try {
+    let result = risky_operation();
+    return result;
+} catch (e: IOException) {
+    println("I/O error: ", e.message);
+} finally {
+    cleanup();
+}
+----
+
+=== `defer`
+
+Schedules a statement to run when the enclosing scope exits:
+
+[source,chronos]
+----
+fn read_file(path: string) -> string {
+    let f = open(path);
+    defer close(f);        // runs on all exit paths
+    return f.read_all();
+}
+----
+
+=== `drop`
+
+Explicitly destroys a linear or affine resource before its scope ends:
+
+[source,chronos]
+----
+{
+    let buf: linear [u8; 4096] = alloc();
+    // ... use buf ...
+    drop buf;   // mandatory for linear types
+}
+----
+
+[[structs-classes]]
+== Structs and Classes
+
+=== Struct Declarations
+
+[source,chronos]
+----
+pub struct Point {
+    x: f64,
+    y: f64,
+}
+
+pub struct Rect {
+    origin: Point,
+    width:  f64,
+    height: f64,
+}
+----
+
+=== Struct Literals
+
+[source,chronos]
+----
+let p = Point { x: 3.0, y: 4.0 };
+
+let r = Rect {
+    origin: p,
+    width:  10.0,
+    height: 5.0,
+};
+----
+
+=== `impl` Blocks
+
+[source,chronos]
+----
+impl Point {
+    fn new(x: f64, y: f64) -> Point {
+        return Point { x: x, y: y };
+    }
+
+    fn distance(self: Point, other: Point) -> f64 {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        return dx * dx + dy * dy;
+    }
+
+    fn translate(self: Point, dx: f64, dy: f64) -> Point {
+        return Point { x: self.x + dx, y: self.y + dy };
+    }
+}
+----
+
+Methods take an explicit `self` parameter of the implementing type.
+Static/associated functions omit `self`.
+
+=== Class Declarations
+
+[source,chronos]
+----
+class Animal {
+    let name: string;
+    var energy: i32;
+
+    fn new(name: string) -> Animal {
+        return Animal { name: name, energy: 100 };
+    }
+
+    fn speak(self: Animal) {
+        println(self.name, "says something.");
+    }
+}
+
+class Dog : Animal {
+    override fn speak(self: Dog) {
+        println(self.name, "barks!");
+    }
+}
+
+abstract class Shape {
+    abstract fn area(self: Shape) -> f64;
+}
+
+final class Circle : Shape {
+    let radius: f64;
+
+    override fn area(self: Circle) -> f64 {
+        return 3.14159 * self.radius * self.radius;
+    }
+}
+----
+
+Class modifiers: `abstract`, `final`, `open`, `sealed`.
+
+=== Data Classes
+
+Kotlin-style data classes auto-derive equality, hashing, and a `copy()` method:
+
+[source,chronos]
+----
+data class Point(x: f64, y: f64)
+data class Person(name: string, age: i32)
+----
+
+=== Companion Objects
+
+[source,chronos]
+----
+class Counter {
+    var count: i32;
+
+    companion object {
+        let DEFAULT: i32 = 0;
+
+        fn create() -> Counter {
+            return Counter { count: Counter::DEFAULT };
+        }
+    }
+}
+----
+
+=== Field Access
+
+[source,chronos]
+----
+let area = rect.width * rect.height;
+let x_coord = rect.origin.x;
+----
+
+=== Safe Navigation
+
+[source,chronos]
+----
+let length = maybe_string?.len();
+----
+
+Returns `none` if `maybe_string` is `none`; otherwise applies `.len()`.
+
+[[enums]]
+== Enums
+
+=== Unit Variants
+
+[source,chronos]
+----
+enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+let dir = Direction::North;
+----
+
+=== Tuple Variants
+
+[source,chronos]
+----
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+let r: Result<i32, string> = Result::Ok(42);
+----
+
+=== Struct Variants
+
+[source,chronos]
+----
+enum Event {
+    KeyPress { key: char, modifiers: u8 },
+    MouseMove { x: i32, y: i32 },
+    Quit,
+}
+----
+
+=== Sealed Hierarchies
+
+`sealed` restricts all variants to the same module, enabling exhaustive pattern matching guaranteed at compile time:
+
+[source,chronos]
+----
+sealed enum Expr {
+    Num(f64),
+    Add(Box<Expr>, Box<Expr>),
+    Mul(Box<Expr>, Box<Expr>),
+    Neg(Box<Expr>),
+}
+----
+
+[[traits]]
+== Traits and Interfaces
+
+=== Declaring a Trait
+
+[source,chronos]
+----
+trait Display {
+    fn fmt(self: Self) -> string;
+}
+
+trait Printable : Display + Clone {
+    fn print(self: Self) {
+        println(self.fmt());      // default implementation
+    }
+}
+----
+
+`interface` is accepted as a synonym for `trait`.
+
+=== Implementing a Trait
+
+[source,chronos]
+----
+impl Display for Point {
+    fn fmt(self: Point) -> string {
+        return "(" + self.x.to_string() + ", " + self.y.to_string() + ")";
+    }
+}
+----
+
+=== Generic Bounds
+
+[source,chronos]
+----
+fn print_all<T: Display>(items: Vec<T>) {
+    for item in items {
+        println(item.fmt());
+    }
+}
+
+fn sort<T>(items: Vec<T>) where T: Ord + Clone { /* ... */ }
+----
+
+=== `derive`
+
+Auto-generate common trait implementations:
+
+[source,chronos]
+----
+@derive(Equals, Hash, ToString, Debug)
+struct Color {
+    r: u8,
+    g: u8,
+    b: u8,
+}
+----
+
+Available derivable traits: `Equals`, `Hash`, `ToString`, `Copy`, `Clone`, `Debug`, `Serialize`, `Order`, `Destructure`.
+
+[[generics]]
+== Generics and Templates
+
+=== Generic Functions
+
+[source,chronos]
+----
+fn max<T: Ord>(a: T, b: T) -> T {
+    if a > b { return a; } else { return b; }
+}
+----
+
+=== Generic Structs
+
+[source,chronos]
+----
+struct Stack<T> {
+    items: Vec<T>,
+}
+
+impl<T> Stack<T> {
+    fn push(self: Stack<T>, item: T) -> Stack<T> { /* ... */ }
+    fn pop(self: Stack<T>) -> (T?, Stack<T>) { /* ... */ }
+}
+----
+
+=== C++-style Templates
+
+[source,chronos]
+----
+template<typename T, usize N>
+struct FixedBuffer {
+    data: [T; N],
+}
+----
+
+=== Variance Annotations
+
+[source,chronos]
+----
+class Producer<out T> { fn produce(self: Self) -> T; }
+class Consumer<in T>  { fn consume(self: Self, value: T); }
+----
+
+`out` = covariant, `in` = contravariant.
+
+=== Reified Generics
+
+[source,chronos]
+----
+inline fn typeOf<reified T>() -> string {
+    return T::type_name();
+}
+----
+
+[[operators]]
+== Operators
+
+=== Operator Precedence
+
+Operators are listed from lowest precedence (binds loosest) to highest (binds tightest).
+Left–right associativity means the left operand binds tighter when both sides have the same nominal precedence.
+
+[cols="1,1,1,3", options="header"]
+|===
+|Operators |Left BP |Right BP |Description
+
+|`=` `+=` `-=` `*=` `/=` `%=`
+|2 |1
+|Right-associative assignment
+
+|`\|>`
+|3 |4
+|Pipe-forward (left)
+
+|`\|\|`
+|5 |6
+|Logical OR
+
+|`&&`
+|7 |8
+|Logical AND
+
+|`==` `!=` `<` `>` `<=` `>=` `<=>`
+|9 |10
+|Comparison / spaceship
+
+|`\|`
+|11 |12
+|Bitwise OR
+
+|`^`
+|13 |14
+|Bitwise XOR
+
+|`&`
+|15 |16
+|Bitwise AND
+
+|`<<` `>>`
+|17 |18
+|Shift
+
+|`..` `..=`
+|19 |20
+|Range (exclusive / inclusive)
+
+|`+` `-`
+|21 |22
+|Addition, subtraction
+
+|`*` `/` `%` `@`
+|23 |24
+|Multiply, divide, modulo, matrix multiply
+
+|`**`
+|28 |27
+|Exponentiation (right-associative)
+
+|`.` `?.` `::`
+|29 |30
+|Member access, safe navigation, path
+|===
+
+[cols="1,1,2", options="header"]
+|===
+|Prefix operator |Binding power |Description
+
+|`-` `!` `~` `&` |25 |Unary minus, logical not, bitwise not, borrow
+|`*` |25 |Dereference
+|===
+
+[cols="1,1,2", options="header"]
+|===
+|Postfix operator |Binding power |Description
+
+|`?` |27 |Error propagation
+|`!!`|27 |Non-null assertion
+|`()`|27 |Function call
+|`[]`|27 |Index
+|===
+
+=== Special Operators
+
+[cols="1,3", options="header"]
+|===
+|Operator |Description
+
+|`\|>`
+|Pipe-forward: `x \|> f` is equivalent to `f(x)`
+
+|`@`
+|Matrix multiply (for tensors/matrices)
+
+|`<=>`
+|Three-way comparison (spaceship); returns negative/zero/positive
+
+|`?.`
+|Safe navigation: short-circuits to `none` if the left side is `none`
+
+|`!!`
+|Non-null assertion: panics at runtime if the value is `none`
+
+|`..`
+|Exclusive range: `1..5` produces `[1, 2, 3, 4]`
+
+|`..=`
+|Inclusive range: `1..=5` produces `[1, 2, 3, 4, 5]`
+|===
+
+[[closures]]
+== Lambdas and Closures
+
+=== Basic Syntax
+
+[source,chronos]
+----
+let double = |x: i32| x * 2;
+
+let add = |a: i32, b: i32| -> i32 {
+    return a + b;
+};
+----
+
+=== Capturing Variables
+
+[source,chronos]
+----
+let threshold: i32 = 10;
+let above = |x: i32| x > threshold;   // captures threshold by reference
+----
+
+=== Passing Closures
+
+[source,chronos]
+----
+fn apply<T>(f: fn(T) -> T, value: T) -> T {
+    return f(value);
+}
+
+let result = apply(|x| x * x, 5);   // 25
+----
+
+=== Pipe-Forward with Closures
+
+[source,chronos]
+----
+let result = data
+    |> |xs| filter(xs, |x| x > 0)
+    |> |xs| map(xs, |x| x * 2)
+    |> sum;
+----
+
+[[modules]]
+== Modules and Imports
+
+=== Module Declaration
+
+[source,chronos]
+----
+mod geometry {
+    pub struct Point { pub x: f64, pub y: f64 }
+    pub fn origin() -> Point { return Point { x: 0.0, y: 0.0 }; }
+}
+----
+
+=== Importing
+
+[source,chronos]
+----
+import std::collections;                // import entire module
+use std::io;                            // use (alias for import)
+use std::fmt::{ Display, Debug };       // selective import
+import geometry as geo;                 // alias
+
+let p = geo::geometry::origin();
+----
+
+=== Package Declaration
+
+[source,chronos]
+----
+package com.example.myapp;
+----
+
+=== Export
+
+[source,chronos]
+----
+export fn public_function() { /* ... */ }
+export struct PublicType { /* ... */ }
+----
+
+[[memory-model]]
+== Memory Model
+
+=== Ownership
+
+Every value has exactly one owner at any point in time. When the owner goes out of scope, the value is dropped.
+
+[source,chronos]
+----
+{
+    let s = String::from("hello");  // s owns the string
+    use(s);                          // ownership transferred to use()
+    // s is no longer valid here
+}
+----
+
+=== Borrowing
+
+[source,chronos]
+----
+fn print_len(s: &string) {
+    println(s.len());
+}
+
+let msg = "hello";
+print_len(&msg);    // borrow; msg is still valid after
+----
+
+Rules:
+* Any number of shared (`&`) borrows may coexist.
+* A mutable (`&mut`) borrow may not coexist with any other borrow.
+* No borrow may outlive its referent.
+
+=== Linear Types
+
+A value of type `linear T` must be used exactly once. The compiler guarantees this at compile time.
+
+[source,chronos]
+----
+fn encrypt(key: linear CryptoKey, data: [u8]) -> ([u8], linear CryptoKey) {
+    // must return the key; cannot silently drop it
+}
+----
+
+=== Affine Types
+
+A value of type `affine T` may be used at most once. Unlike linear, it may be silently discarded.
+
+[source,chronos]
+----
+let handle: affine FileHandle = open("log.txt");
+// handle may be dropped by going out of scope without explicit consumption
+----
+
+=== `with` — Resource Scoping
+
+[source,chronos]
+----
+with open("config.toml") as f {
+    let content = f.read_all();
+}   // f is automatically closed here
+----
+
+[[advanced-features]]
+== Advanced Language Features
+
+=== GPU Kernels
+
+[source,chronos]
+----
+kernel gpu matmul(
+    a: tensor<f32, [M, K]>,
+    b: tensor<f32, [K, N]>
+) -> tensor<f32, [M, N]> {
+    // body runs on the GPU
+}
+----
+
+Kernel qualifiers: `gpu`, `cpu`, `tpu`, `npu`.
+Performance hints: `tile`, `vectorize`, `unroll`, `parallel`, `simd`.
+
+[source,chronos]
+----
+@vectorize(8)
+@unroll(4)
+kernel gpu dot_product(a: tensor<f32, [N]>, b: tensor<f32, [N]>) -> f32 {
+    // SIMD-vectorized dot product
+}
+----
+
+=== Device Scopes
+
+[source,chronos]
+----
+device gpu {
+    // code in this block runs on the GPU
+    let result = heavy_tensor_op(data);
+}
+
+device cpu {
+    // fallback path
+}
+----
+
+=== AI Skills, Tools, and Pipelines
+
+[source,chronos]
+----
+ai skill Summarize {
+    description "Summarize input text"
+    schema {
+        text:      str,
+        max_words: int,
+    }
+    instruction "Return a concise summary in plain English."
+    constraint  "Never exceed max_words words."
+    example {
+        input:  { text: "Long article...", max_words: 50 }
+        output: "Short summary."
+    }
+}
+
+ai tool WebSearch fn search(query: string) -> string {
+    // implementation
+}
+
+ai pipeline ResearchBot {
+    fetch     -> WebSearch,
+    summarize -> Summarize,
+}
+----
+
+Invoking a skill:
+
+[source,chronos]
+----
+let summary = @@Summarize { text: article, max_words: 100 };
+----
+
+=== Annotations
+
+[source,chronos]
+----
+@deprecated
+@device(gpu)
+@derive(Debug, Clone)
+@expires("2027-01-01")
+----
+
+=== Version Tracking
+
+[source,chronos]
+----
+@version("1.2.3")
+@track(branch: "main", risk: Low)
+fn feature_x() { /* ... */ }
+----
+
+=== Proof Obligations
+
+[source,chronos]
+----
+pure fn divide(a: i32, b: i32) -> i32
+    requires b != 0
+    ensures result * b == a
+{
+    return a / b;
+}
+----
+
+The proof engine verifies these contracts at compile time using the Calculus of Constructions.
+
+=== Coroutines and Generators
+
+[source,chronos]
+----
+suspend fn count_up(start: i32) -> i32 {
+    var n = start;
+    loop {
+        yield n;
+        n += 1;
+    }
+}
+----
+
+=== Extension Functions
+
+[source,chronos]
+----
+extension fun String.words() -> Vec<string> {
+    return self.split(" ");
+}
+
+let w = "hello world".words();   // ["hello", "world"]
+----
+
+[[builtins]]
+== Built-in Functions
+
+The following functions are available in every Chronos program without any import:
+
+[cols="1,1,1,3", options="header"]
+|===
+|Function |Parameters |Return |Description
+
+|`println`
+|`(any...)` variadic
+|`void`
+|Print arguments separated by spaces, followed by newline
+
+|`print`
+|`(any...)` variadic
+|`void`
+|Print arguments without trailing newline
+
+|`print_line`
+|`(str)`
+|`void`
+|Alias for `println` (single string)
+
+|`assert`
+|`(bool, str)`
+|`void`
+|Abort with message if condition is false
+
+|`exit`
+|`(i32)`
+|`never`
+|Terminate the process with the given exit code
+
+|`abort`
+|`()`
+|`never`
+|Abort the process unconditionally
+|===
+
+`println` accepts any number of arguments of any type and formats them automatically, inserting spaces between arguments.
+
+[source,chronos]
+----
+println("Result:", 42);            // Result: 42
+println(1, 2, 3);                  // 1 2 3
+println("pi =", 3.14);             // pi = 3.14
+assert(x > 0, "x must be positive");
+----
+
+'''
+
+// ============================================================
+// PART III: COMPILER TOOLCHAIN
+// ============================================================
+
+[[part-toolchain]]
+= Part III: Compiler Toolchain
+
+[[cli]]
+== Command-Line Interface
+
+The `chronos` binary is the entry point for all compilation tasks.
+
+=== Synopsis
+
+[source,shell]
+----
+chronos <subcommand> [options] [file]
+----
+
+=== Subcommands
+
+==== `build` — Compile to Binary
+
+[source,shell]
+----
+chronos build [options] <file.chr>
+----
+
+[cols="1,3", options="header"]
+|===
+|Option |Description
+
+|`-o <name>`
+|Output binary name (default: source filename without extension)
+
+|`--release`
+|Enable optimizations (`/O2` for MSVC, `-O2` for GCC/Clang)
+
+|`--emit-llvm`
+|Write LLVM IR to `<file>.ll` and stop
+
+|`--target <triple>`
+|Cross-compile for a specific target (see targets below)
+
+|`--no-security`
+|Disable the security audit pass
+|===
+
+[source,shell]
+----
+chronos build hello.chr
+chronos build -o my_app --release main.chr
+chronos build --emit-llvm main.chr   # produces main.ll
+----
+
+==== `check` — Type-Check Only
+
+[source,shell]
+----
+chronos check [options] <file.chr>
+----
+
+Runs the lexer, parser, and type inference without producing any output file.
+Useful for IDE integration and CI linting.
+
+[source,shell]
+----
+chronos check src/main.chr
+# No errors.
+----
+
+==== `run` — Build and Execute
+
+[source,shell]
+----
+chronos run [options] <file.chr> [-- program-args...]
+----
+
+Compiles the file to a temporary binary and immediately executes it.
+Arguments after `--` are passed to the compiled program.
+
+[source,shell]
+----
+chronos run hello.chr
+chronos run game.chr -- --fullscreen --width 1920
+----
+
+==== `version` — Print Version
+
+[source,shell]
+----
+chronos version
+# Chronos 0.1.0
+----
+
+=== Cross-Compilation Targets
+
+[cols="1,2", options="header"]
+|===
+|Target string |Description
+
+|`x86_64-linux`   |64-bit Linux (ELF)
+|`x86_64-windows` |64-bit Windows (PE/COFF)
+|`x86_64-macos`   |64-bit macOS (Mach-O)
+|`aarch64-linux`  |64-bit ARM Linux
+|`aarch64-macos`  |Apple Silicon macOS
+|`wasm32`         |WebAssembly (32-bit)
+|===
+
+[source,shell]
+----
+chronos build --target aarch64-linux server.chr
+----
+
+=== Compilation Strategy
+
+The compiler uses a two-pass strategy:
+
+1. **C back-end (primary)** — emits C99 code and compiles with:
+** Windows: `cl.exe` (MSVC) located automatically in standard VS installation paths
+** Linux / macOS: `cc` (GCC or Clang)
+2. **LLVM IR back-end (fallback)** — emits LLVM IR and invokes `clang` when the C path is unavailable or `--emit-llvm` is specified.
+
+When a compilation error occurs from the underlying C compiler, the generated `.c` file is preserved and a `Compile manually:` hint is printed so you can inspect it directly.
+
+[[compiler-pipeline]]
+== Compiler Pipeline
+
+Every source file passes through eight sequential phases. All phases share a `CompilationContext` structure that accumulates results.
+
+[plantuml, pipeline, svg]
+....
+Source → Lexer → Parser → Type Inference → Security Audit → Degradation Check → IR Lowering → WCET Analysis → Code Generation
+....
+
+=== Phase 1 — Lexer
+
+*Input:* UTF-8 source text +
+*Output:* `Vec<SpannedToken>` +
+*Module:* `chronos-lexer.rs`
+
+The lexer is generated from the `logos` crate via a DFA. It recognizes:
+
+* 150+ keyword tokens (organized by feature area)
+* All numeric literal forms (decimal, hex, octal, binary)
+* Standard, raw, and triple-quoted string literals
+* Unicode identifiers
+* All operator and punctuation tokens
+* Line comments, block comments, and whitespace (all automatically skipped)
+
+The output retains source span (line/column) information for every token, used in diagnostic messages.
+
+=== Phase 2 — Parser
+
+*Input:* Token stream +
+*Output:* `Program` AST +
+*Module:* `chronos-parser.rs`, `chronos-parser-v2.rs`
+
+The parser is a hand-written recursive descent / Pratt parser. The Pratt algorithm handles operator precedence in expressions without grammar ambiguity.
+
+Recognized top-level items:
+
+`fn`, `async fn`, `kernel`, `class`, `abstract class`, `struct`, `data class`, `enum`, `sealed enum`, `trait`, `interface`, `impl`, `impl … for`, `type`, `mod`, `import`, `use`, `const`, `static`, `ai skill`, `ai tool`, `ai pipeline`, `degradable fn`
+
+=== Phase 3 — Type Inference
+
+*Input:* `Program` AST +
+*Output:* `TypeEnvironment`, inferred effects, taint map, unit map +
+*Module:* `chronos-type-inference.rs`, `chronos-inference-ir-v2.rs`
+
+The type inference engine implements Hindley-Milner extended with:
+
+* **Subtyping** — numeric coercions, trait bounds
+* **Linear / affine type checking** — consume-exactly-once semantics
+* **Effect inference** — tracks IO, Alloc, Gpu, Network, etc. per function
+* **Taint tracking** — data-flow analysis that records which variables hold potentially unsafe external data
+* **Dimensional analysis** — detects unit mismatches (e.g., metres + seconds)
+* **Quantum state tracking** — models qubit state through operations
+
+A forward-declaration pre-pass registers all function signatures before their bodies are checked, enabling mutual recursion and out-of-order definitions.
+
+=== Phase 4 — Security Audit
+
+*Input:* `CompilationContext` (especially taint map) +
+*Output:* `Vec<SecurityFinding>`, `audit_passed: bool` +
+*Module:* `chronos-security-realtime.rs`
+
+Activated by `#![secure]` at the top of the source file or the `--secure` flag.
+The audit engine runs multiple passes:
+
+* Buffer overflow / bounds checking
+* Injection vulnerabilities (SQL, command, XSS, path traversal)
+* Cryptographic weaknesses (weak ciphers, weak hash functions, hardcoded credentials)
+* Memory safety (use-after-free, double-free)
+* Access control and authentication gaps
+* Race conditions
+
+Each finding is tagged with a severity, a CWE identifier, a CVSS score, and an auto-fix suggestion where applicable.
+
+==== Security Modes
+
+[cols="1,3", options="header"]
+|===
+|Mode |Behavior
+
+|`Off` (default)
+|No audit; fastest build
+
+|`Warn`
+|Audit runs; findings printed as warnings; compilation succeeds
+
+|`Enforce`
+|Any `Medium` or higher finding causes a compilation error
+
+|`Formal`
+|`Enforce` + formal verification + mandatory code signing
+|===
+
+Activate via source annotation:
+
+[source,chronos]
+----
+#![secure(enforce)]
+
+fn handle_user_input(raw: string) {
+    // taint-tracked; unsafe use causes compile error
+}
+----
+
+=== Phase 5 — Degradation Check
+
+*Input:* AST (degradable function annotations) +
+*Output:* `Vec<CompilerDiagnostic>` +
+*Module:* `chronos-unified-integration.rs`
+
+Checks `@expires` and `@warns` dates against the current date and emits warnings or errors accordingly. This enforces automatic deprecation timelines.
+
+=== Phase 6 — IR Lowering
+
+*Input:* `Program` AST, `TypeEnvironment` +
+*Output:* `IRModule` (SSA-based IR) +
+*Module:* `chronos-ir-codegen.rs`
+
+The IR is an SSA (Static Single Assignment) form inspired by MLIR. It supports:
+
+* Standard arithmetic, comparison, and memory opcodes
+* High-level domain-specific opcodes: `Gemm` (matrix multiply), `Conv`, `Scatter`, `Gather`
+* GPU-specific opcodes for CUDA/NVPTX target
+* Quantum opcodes for the quantum simulation target
+
+Three code generation back-ends read from the IR:
+
+* `LLVMBackend` — emits LLVM IR text (`.ll`)
+* `CUDABackend` — emits NVPTX PTX assembly
+* `CBackend` — emits C99 source (`.c`), the primary production back-end
+
+=== Phase 7 — WCET Analysis (Real-Time Mode)
+
+*Input:* `IRModule` +
+*Output:* `HashMap<fn_name, WCETResult>` +
+*Module:* `chronos-security-realtime.rs`
+
+Activated by `#![realtime]` or `--realtime`. Performs static worst-case execution time analysis, computing cycle-count upper bounds for each function relative to a target `HardwareModel`.
+
+Real-time mode also enforces no dynamic allocation (`Alloc` effect forbidden) and no unbounded loops.
+
+[source,chronos]
+----
+#![realtime]
+
+fn isr_handler(event: u32) {
+    // must complete within a bounded cycle count
+}
+----
+
+=== Phase 8 — Code Generation
+
+*Input:* `IRModule`, AST +
+*Output:* Byte blobs in `CompilationContext::generated_code` +
+*Module:* `chronos-c-backend.rs`, `chronos-ir-codegen.rs`
+
+==== C Back-End (Primary)
+
+The C back-end lowers the Chronos AST directly to C99 without going through IR, providing maximal compatibility with MSVC, GCC, and Clang. It:
+
+* Emits typed C declarations (`int64_t`, `double`, `const char*`, etc.)
+* Emits a small runtime prelude with helpers like `__chr_println_str`, `__chr_println_i64`, and C11 `_Generic` macros for type-dispatched printing
+* Handles `if`/`else`, `while`, assignments, function calls, struct literals, and field access
+* Emits forward declarations for all functions to permit mutual recursion
+
+Generated C is compiled by the platform C compiler:
+
+[cols="1,2", options="header"]
+|===
+|Platform |Compiler
+
+|Windows (MSVC)
+|`cl.exe /std:c11 /O2`
+
+|Linux / macOS
+|`cc -std=c11 -O2 -lm`
+|===
+
+==== LLVM IR Back-End (Fallback)
+
+Emits LLVM IR text suitable for `llc` or `clang`. Activated by `--emit-llvm` or when `cl.exe` and `cc` are both unavailable.
+
+'''
+
+// ============================================================
+// PART IV: DOMAIN ENGINES
+// ============================================================
+
+[[part-engines]]
+= Part IV: Domain Engines
+
+Chronos ships 24 built-in domain engines, each a self-contained module of real, working algorithms. They are available to any Chronos program via `import` and are integrated with the type system — for example, the graph engine registers `Graph<N, E>` as a first-class type understood by the type checker.
+
+[[engine-graph]]
+== Graph Engine
+
+*Module:* `chronos-graph-engine.rs`
+
+Provides a fully-featured, generic directed/undirected graph library.
+
+[cols="1,3", options="header"]
+|===
+|Algorithm family |Algorithms
+
+|Search
+|BFS, DFS, iterative DFS
+
+|Shortest path
+|Dijkstra (single-source), Bellman-Ford, Floyd-Warshall (all-pairs), A*
+
+|Spanning tree
+|Kruskal (MST), Prim (MST)
+
+|Flow
+|Ford-Fulkerson, Edmonds-Karp (max flow), min-cut
+
+|Connectivity
+|Tarjan SCC, Kosaraju SCC, articulation points, bridge finding
+
+|Centrality
+|PageRank, betweenness centrality, closeness centrality
+
+|Coloring
+|Greedy graph coloring, chromatic number bounds
+
+|Matching
+|Bipartite matching (Hopcroft-Karp)
+
+|Misc
+|Topological sort, cycle detection, graph isomorphism heuristics
+|===
+
+[[engine-cas]]
+== Computer Algebra System (CAS)
+
+*Module:* `chronos-cas-engine.rs`
+
+A full symbolic mathematics engine:
+
+* Symbolic differentiation and integration
+* Polynomial arithmetic (addition, multiplication, division, GCD)
+* Equation solving (linear, quadratic, systems)
+* Matrix operations (determinant, inverse, eigenvalues)
+* Series expansion (Taylor, Laurent)
+* Transforms (Fourier, Laplace, Z-transform)
+* Special functions (gamma, beta, Bessel)
+* Simplification and canonical form reduction
+
+[[engine-network]]
+== Network Engine
+
+*Module:* `chronos-network-engine.rs`
+
+A complete networking stack:
+
+* Zero-copy byte buffer with cursor-based reading
+* Wire format primitives with configurable endianness
+* Protocol state machine generation with compile-time correctness guarantees
+* IPv4 packet construction and parsing
+* TCP with full connection state machine (SYN/ACK handshake, FIN/RST teardown)
+* HTTP/1.1 request and response parsing
+* DNS query and response serialization
+* Checksums: CRC32, CRC16, Adler32, IPv4 checksum
+
+[[engine-os]]
+== OS Engine
+
+*Module:* `chronos-os-engine.rs`
+
+OS-level primitives for systems programming and kernel development:
+
+* Page frame allocator (physical memory management)
+* Buddy allocator (power-of-two heap blocks)
+* Slab allocator (fixed-size object pools)
+* CFS-style process scheduler with time-slice rotation
+* Virtual memory mapping and TLB management
+* Interrupt descriptor table and exception handlers
+* System call interface simulation
+* IPC: pipes, message queues, shared memory
+
+[[engine-distributed]]
+== Distributed Systems Engine
+
+*Module:* `chronos-distributed-engine.rs`
+
+* Logical clocks: Lamport, vector, hybrid logical clocks
+* Raft consensus (leader election, log replication, snapshotting)
+* CRDTs: G-Counter, PN-Counter, OR-Set, LWW-Register
+* Consistent hashing with virtual nodes and rebalancing
+* Gossip protocol with epidemic dissemination
+* Distributed transactions: two-phase commit, saga pattern
+* Partition detection and split-brain resolution
+
+[[engine-blockchain]]
+== Blockchain Engine
+
+*Module:* `chronos-blockchain-engine.rs`
+
+* SHA-256 and Keccak-256 (SHA-3) hash implementations
+* Block structure with tamper-evident chained hashes
+* Proof-of-work mining with adjustable difficulty
+* Complete EVM (Ethereum Virtual Machine) interpreter
+* Gas metering for all opcodes
+* Smart contract ABI encoding / decoding
+* Merkle tree construction and proof verification
+* ECDSA signing and verification (secp256k1)
+
+[[engine-proof]]
+== Proof Engine
+
+*Module:* `chronos-proof-engine.rs`
+
+A built-in formal verification system based on the Calculus of Constructions (CoC):
+
+* Dependent types (Π-types, σ-types)
+* Curry-Howard correspondence: proofs as programs, types as propositions
+* Tactics engine: `intro`, `apply`, `exact`, `rewrite`, `induction`, `simp`
+* Proof term checking via bidirectional type checking
+* Integration with the compiler: `requires` / `ensures` contracts verified at compile time
+* Compatible with Coq, Lean, and Agda proof styles
+
+[[engine-quantum]]
+== Quantum Engine
+
+*Module:* `chronos-quantum-engine.rs`
+
+A statevector quantum simulator:
+
+* N-qubit state represented as 2^N complex amplitudes
+* Single-qubit gates: Pauli X/Y/Z, Hadamard, S, T, Rx/Ry/Rz, Phase
+* Two-qubit gates: CNOT, SWAP, CZ, Toffoli (CCX)
+* Multi-qubit entanglement and superposition
+* Projective measurement with state collapse
+* Quantum algorithms: Grover's search, Quantum Fourier Transform
+* Density matrix simulation (open quantum systems)
+* Circuit visualization
+
+[[engine-simulation]]
+== Simulation and Data Science Engine
+
+*Module:* `chronos-simulation-datascience.rs`
+
+* Descriptive statistics: mean, variance, skewness, kurtosis, percentiles
+* Linear algebra: QR decomposition, SVD, LU factorization, eigenvalues
+* ODE solvers: Euler, Runge-Kutta 4th order, adaptive step-size RK45
+* Finite Element Method (FEM) for PDE discretization
+* Monte Carlo integration and random number generation
+* N-body particle simulation
+* Signal processing: convolution, correlation, windowing
+
+[[engine-security]]
+== Security and Real-Time Engine
+
+*Module:* `chronos-security-realtime.rs`
+
+=== Security Audit
+
+Nine audit passes run on the taint-annotated IR:
+
+[cols="1,3", options="header"]
+|===
+|Pass |What it detects
+
+|Injection analysis
+|SQL, command, XSS, LDAP, XML injection via taint paths
+
+|Memory safety
+|Buffer overflows, use-after-free, double-free, out-of-bounds indexing
+
+|Crypto audit
+|Weak ciphers (DES, RC4), weak hashes (MD5, SHA-1), hardcoded keys
+
+|Authentication
+|Missing auth checks, insecure session management, weak token entropy
+
+|Access control
+|Privilege escalation, IDOR, missing RBAC enforcement
+
+|Taint propagation
+|Tracking untrusted data through assignments, function calls, and returns
+
+|Secure coding
+|Null dereferences, integer overflows, format string vulnerabilities
+
+|Network security
+|Unencrypted channels, certificate validation bypass
+
+|Supply chain
+|Dependency version pinning, SBOM generation
+|===
+
+=== WCET Analysis
+
+Computes worst-case execution time bounds for real-time code:
+
+* Instruction-level cycle cost modeling per `HardwareModel`
+* Loop bound analysis and annotation support
+* Domain-specific costs: quantum gate latencies, tensor operation cycle counts
+* Integration with MISRA-C / DO-178C style safety annotation
+
+[[engine-dsp]]
+== DSP Engine
+
+*Module:* `chronos-dsp-engine.rs`
+
+* Complex number arithmetic
+* FFT (Cooley-Tukey, radix-2 DIT/DIF)
+* Short-Time Fourier Transform (STFT) with configurable overlap
+* Window functions: Hann, Hamming, Blackman, Kaiser, Bartlett, Flat Top
+* FIR filter design (windowed sinc, Parks-McClellan)
+* IIR filter design (Butterworth, Chebyshev I/II, Elliptic)
+* Convolution and cross-correlation
+* Sample rate conversion (polyphase resampling)
+* MFCC (Mel-Frequency Cepstral Coefficients) for speech processing
+* Phase vocoder for time-stretching and pitch-shifting
+* Real-time audio pipeline at 44.1 / 48 kHz
+
+[[engine-financial]]
+== Financial Engine
+
+*Module:* `chronos-financial-engine.rs`
+
+* Options pricing: Black-Scholes analytical, Binomial tree, Monte Carlo
+* Greeks: Delta, Gamma, Theta, Vega, Rho
+* Fixed income: bond pricing, duration, convexity, yield curve bootstrapping
+* Portfolio optimization: Markowitz mean-variance, efficient frontier
+* Risk analytics: VaR (Value at Risk), CVaR, Sharpe ratio, Sortino ratio, Maximum Drawdown
+* Term structure models: Vasicek, CIR, Hull-White
+* Credit risk: structural models (Merton), CDS pricing
+
+[[engine-geospatial]]
+== Geospatial Engine
+
+*Module:* `chronos-geospatial-engine.rs`
+
+* Geodetic computations: Vincenty's direct and inverse formulae
+* Great-circle distance and bearing
+* Coordinate transformations: WGS84 geodetic ↔ ECEF ↔ ENU (local level)
+* Projections: UTM (all zones), Web Mercator (EPSG:3857)
+* Spatial indexing: R-tree, quadtree, geohash encoding/decoding
+* Routing: Dijkstra, A* on road networks
+* Digital Elevation Model interpolation (bilinear, bicubic)
+* Polygon containment, convex hull, Voronoi diagrams
+
+=== Additional Engines (Summary)
+
+[cols="1,3", options="header"]
+|===
+|Engine |Key capabilities
+
+|`chronos-ffi-engine`
+|C/C++/Python/JVM/WASM interop; ABI classification; calling conventions; C++ name mangling; RAII wrappers
+
+|`chronos-game-engine`
+|Entity-Component System; Verlet / semi-implicit Euler physics; rigid body dynamics; 60+ FPS render loop
+
+|`chronos-i18n-engine`
+|BCP 47 language tags; Unicode normalization (NFC/NFD/NFKC/NFKD); bidirectional text; plural rules for 20+ languages; collation; number/date/currency formatting
+
+|`chronos-accessibility-engine`
+|WAI-ARIA 1.2 roles and states; accessible name computation; keyboard navigation; WCAG 2.1 compliance; color contrast checking
+
+|`chronos-hotreload-engine`
+|Live code replacement without process restart; trampoline patching (x86-64 and ARM64); symbol versioning; thread-safe RCU-based patch application
+
+|`chronos-observability-engine`
+|OpenTelemetry-compatible distributed tracing; Counter/Gauge/Histogram/Summary metrics; structured logging; W3C TraceContext; sampling strategies
+
+|`chronos-bioinformatics-engine`
+|Smith-Waterman and Needleman-Wunsch alignment; DNA/RNA/protein sequence analysis; central dogma pipeline
+
+|`chronos-nlp-engine`
+|Tokenization (contractions, subword); Chomsky hierarchy parsing; dependency parsing; word embeddings; LSTM/Transformer models; NER; sentiment analysis
+
+|`chronos-database-engine`
+|Full ACID transactions; B-tree and LSM-tree storage; buffer pool; query optimization; WAL-based crash recovery
+
+|`chronos-multimedia-engine`
+|Audio sample buffers (44.1/48 kHz); video frame management; image convolution kernels; real-time codec scaffolding
+
+|`chronos-robotics-engine`
+|Forward/inverse kinematics; PID/LQR/MPC control; trajectory planning; sensor fusion; SLAM
+
+|`chronos-ui-engine`
+|Flexbox and constraint-based layout; retained-mode widget tree; event hit-testing; immediate-mode API (Dear ImGui style); widget diffing and reconciliation
+|===
+
+'''
+
+// ============================================================
+// PART V: WORKSPACE ARCHITECTURE
+// ============================================================
+
+[[part-architecture]]
+= Part V: Workspace Architecture
+
+[[workspace-layout]]
+== Cargo Workspace Layout
+
+The Chronos compiler is organized as a Cargo workspace. Source files are kept as standalone `.rs` files at the root; each crate wraps one or more of them via Rust's `include!()` macro.
+
+[source]
+----
+Chronos Programming Language/
+├── Cargo.toml                    ← workspace manifest
+├── chronos-lexer.rs              ← source files (flat, canonical)
+├── chronos-parser.rs
+├── chronos-type-inference.rs
+├── chronos-ir-codegen.rs
+├── chronos-security-realtime.rs
+├── chronos-unified-integration.rs
+├── chronos-c-backend.rs
+├── chronos-stdlib-types.rs
+├── chronos-*-engine.rs           ← 24 domain engines
+│
+├── crates/
+│   ├── compiler/
+│   │   ├── chronos-compiler-core/   ← unified pipeline crate
+│   │   │   └── src/
+│   │   │       ├── lib.rs           ← include!() all pipeline files
+│   │   │       ├── missing_types.rs ← shared AST / type definitions
+│   │   │       └── missing_types_late.rs ← wrapper types
+│   │   ├── chronos-lexer/
+│   │   ├── chronos-parser/
+│   │   ├── chronos-type-inference/
+│   │   ├── chronos-ir-codegen/
+│   │   ├── chronos-security-realtime/
+│   │   └── ...
+│   ├── engines/
+│   │   ├── chronos-graph/
+│   │   ├── chronos-cas/
+│   │   └── ...                      ← 24 engine crates
+│   ├── tooling/
+│   │   ├── chronos-build/
+│   │   ├── chronos-testing/
+│   │   └── chronos-docs/
+│   └── bin/
+│       └── chronos-cli/             ← the `chronos` binary
+│
+└── examples/
+    ├── hello.chr
+    ├── fibonacci.chr
+    └── structs.chr
+----
+
+[[compilation-context]]
+== CompilationContext — Shared Pipeline State
+
+All eight compiler phases read and write a single `CompilationContext` structure. This eliminates the need for inter-phase function arguments and makes the pipeline trivially extensible.
+
+[source,rust]
+----
+pub struct CompilationContext {
+    pub filename:             String,
+    pub source:               String,
+    pub security_mode:        SecurityMode,
+    pub realtime_mode:        bool,
+
+    // Phase 1 outputs
+    pub tokens:               Vec<SpannedToken>,
+
+    // Phase 2 outputs
+    pub ast:                  Option<Program>,
+    pub version_rules:        Option<VersionRules>,
+
+    // Phase 3 outputs
+    pub type_env:             TypeEnvironment,
+    pub inferred_effects:     HashMap<String, Vec<Effect>>,
+    pub taint_map:            TaintMap,
+    pub unit_map:             UnitMap,
+    pub qubit_state_map:      QubitStateMap,
+    pub linear_resource_map:  LinearResourceMap,
+    pub proof_obligations:    Vec<ProofObligation>,
+
+    // Phase 4 outputs
+    pub security_findings:    Vec<SecurityFinding>,
+    pub audit_passed:         bool,
+
+    // Phase 5 outputs
+    pub degradation_diagnostics: Vec<CompilerDiagnostic>,
+
+    // Phase 6 outputs
+    pub ir_module:            Option<IRModule>,
+
+    // Phase 7 outputs
+    pub wcet_results:         HashMap<String, WCETResult>,
+
+    // Phase 8 outputs
+    pub generated_code:       HashMap<String, Vec<u8>>,
+
+    pub all_diagnostics:      Vec<CompilerDiagnostic>,
+}
+----
+
+The `generated_code` map is keyed by back-end name: `"c"` for the C back-end, `"llvm"` for LLVM IR, `"ptx"` for CUDA PTX.
+
+[[include-order]]
+== compiler-core Include Order
+
+The `chronos-compiler-core` crate includes all pipeline files sequentially in a single Rust module, so every type defined in an earlier file is in scope for all later files:
+
+[cols="1,2", options="header"]
+|===
+|Step |File
+
+|1 |`chronos-lexer.rs` — defines `Token`, `Lexer`, `SpannedToken`
+|2 |`chronos-stdlib-types.rs` — universal `ChronosType` enum
+|3 |`missing_types.rs` — AST nodes: `Expression`, `Statement`, `Program`, `BinOp`, …
+|4 |`chronos-parser.rs` — recursive descent / Pratt parser
+|5 |`chronos-parser-v2.rs` — extended parser for domain-specific syntax
+|6 |`chronos-type-inference.rs` — Hindley-Milner + effects + taint
+|7 |`chronos-inference-ir-v2.rs` — V2 type rules
+|8 |`chronos-ir-codegen.rs` — SSA IR + LLVM / CUDA back-ends
+|9 |`chronos-security-realtime.rs` — 9-pass audit + WCET analysis
+|10|`chronos-unified-integration.rs` — `compile()` orchestrator
+|11|`chronos-c-backend.rs` — C99 code generator
+|12|`missing_types_late.rs` — wrapper types delegating to real implementations
+|===
+
+[[compiler-config]]
+== CompilerConfig
+
+[source,rust]
+----
+pub struct CompilerConfig {
+    pub security_mode:  SecurityMode,
+    pub realtime_mode:  bool,
+    pub target:         CompilationTarget,
+    pub hardware_model: Option<HardwareModel>,
+}
+----
+
+`CompilationTarget` specifies the output architecture:
+
+[source,rust]
+----
+pub enum TargetArch {
+    X86_64, AArch64, RiscV64, Wasm32,
+    NVPTX64,  // NVIDIA GPU
+    TPUv4,    // Google TPU
+}
+----
+
+'''
+
+// ============================================================
+// APPENDICES
+// ============================================================
+
+[[appendix-keywords]]
+[appendix]
+== Keyword Reference
+
+=== Control Flow
+`if`, `else`, `match`, `when`, `for`, `in`, `while`, `loop`, `do`, `break`, `continue`, `return`, `yield`, `throw`, `try`, `catch`, `finally`
+
+=== Declarations
+`fn`, `fun`, `async`, `suspend`, `inline`, `constexpr`, `kernel`, `degradable`, `ai`, `skill`, `tool`, `pipeline`
+
+=== Types and Structures
+`struct`, `class`, `enum`, `trait`, `interface`, `data`, `sealed`, `template`, `type`, `impl`, `object`, `companion`, `extension`
+
+=== Modifiers
+`pub`, `private`, `protected`, `internal`, `crate`, `abstract`, `final`, `open`, `override`, `virtual`, `operator`, `static`, `const`, `lazy`
+
+=== Memory and Ownership
+`let`, `var`, `val`, `mut`, `ref`, `own`, `move`, `linear`, `affine`, `drop`, `unsafe`, `pin`, `with`, `defer`
+
+=== Modules
+`mod`, `module`, `import`, `use`, `from`, `as`, `package`, `export`
+
+=== Type System
+`where`, `is`, `in`, `out`, `reified`, `crossinline`, `noinline`, `typeof`, `sizeof`, `alignof`
+
+=== Effects
+`pure`, `effect`, `handle`, `perform`
+
+=== Device / GPU
+`device`, `gpu`, `cpu`, `tpu`, `npu`, `tensor`, `kernel`, `shape`, `tile`, `vectorize`, `unroll`, `parallel`, `shared`, `global`, `simd`, `distributed`
+
+=== AI
+`ai`, `skill`, `tool`, `pipeline`, `instruction`, `constraint`, `example`, `persona`, `schema`, `invoke`
+
+=== Version / Degradation
+`degradable`, `expires`, `warns`, `replaces`, `deprecated`, `version`, `track`, `risk`, `branch`, `geo`
+
+=== Primitives
+`void`, `bool`, `char`, `str`, `string`, `never`, `int`, `uint`, `usize`, `isize`, `i8`–`i128`, `u8`–`u128`, `f16`–`f128`, `bf16`
+
+=== Literals and Constants
+`true`, `false`, `null`, `nil`, `none`, `some`, `self`, `Self`, `super`, `this`, `new`, `delete`
+
+=== Derivation
+`derive`, `case`, `val`
+
+[[appendix-type-system-summary]]
+[appendix]
+== Type System Quick Reference
+
+[cols="1,2,2", options="header"]
+|===
+|Concept |Syntax |Notes
+
+|Immutable binding     |`let x: T = e`               |Type may be inferred
+|Mutable binding       |`var x: T = e`               |
+|Compile-time constant |`const X: T = e`             |Evaluated at compile time
+|Type alias            |`type Foo = T`               |
+|Generic type param    |`<T>`, `<T: Bound>`          |
+|Effect annotation     |`fn f() -> R / E1, E2`       |
+|Linear type           |`linear T`                   |Must consume exactly once
+|Affine type           |`affine T`                   |Consume at most once
+|Shared borrow         |`&T`                         |
+|Mutable borrow        |`&mut T`                     |
+|Optional              |`T?`                         |Alias for `Optional<T>`
+|Tensor                |`tensor<T, [D...]>`          |Device-aware
+|Range (exclusive)     |`lo..hi`                     |
+|Range (inclusive)     |`lo..=hi`                    |
+|===
+
+[[appendix-diagnostics]]
+[appendix]
+== Diagnostic Codes
+
+Error codes follow the pattern `E-PHASE-NNN`.
+
+[cols="1,1,3", options="header"]
+|===
+|Code prefix |Phase |Description
+
+|`E-LEX-`    |Lexer          |Lexical error (invalid character, unterminated literal)
+|`E-PARSE-`  |Parser         |Syntax error (unexpected token, missing brace)
+|`E-TYPE-`   |Type inference |Type mismatch, unbound variable, arity mismatch
+|`E-SEC-`    |Security audit |Vulnerability detected
+|`E-DEGRAD-` |Degradation    |Expired or imminently expiring function
+|`E-IR-`     |IR lowering    |Lowering error
+|`E-WCET-`   |WCET analysis  |Real-time constraint violated
+|`E-CODEGEN-`|Code generation|Code generation failure
+|===
+
+Common type errors:
+
+[cols="1,3", options="header"]
+|===
+|Code |Meaning
+
+|`E-TYPE-001` |Unbound variable: identifier not in scope
+|`E-TYPE-002` |Type mismatch: expected X, found Y
+|`E-TYPE-003` |Function arity mismatch: wrong number of arguments
+|`E-TYPE-004` |Linear resource not consumed
+|`E-TYPE-005` |Linear resource used more than once
+|===
